@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eris AI Mainframe Terminal</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background-color: #0b0c10;
+            color: #e2e8f0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+        }
+        
+        /* Sidebar Layout Container */
+        .sidebar {
+            width: 280px;
+            min-width: 280px;
+            background-color: #111217;
+            border-right: 1px solid #1f2026;
+            display: flex;
+            flex-direction: column;
+            padding: 24px 16px;
+            height: 100%;
+        }
+        
+        .new-chat-btn {
+            background: #ffffff;
+            color: #111217;
+            padding: 14px;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            margin-bottom: 24px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+        .new-chat-btn:hover {
+            background: #f1f5f9;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Interactive Recents Segment Bar Header */
+        .recents-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding: 0 8px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .history-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #64748b;
+            font-weight: 700;
+        }
+        .collapse-arrow {
+            width: 14px;
+            height: 14px;
+            fill: none;
+            stroke: #64748b;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            opacity: 0;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+        .recents-header:hover .collapse-arrow {
+            opacity: 1;
+        }
+        .collapse-arrow.collapsed {
+            transform: rotate(-90deg);
+        }
+
+        .history-list {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 4px;
+            margin-bottom: 12px;
+        }
+        .history-list.hidden-pane {
+            display: none;
+        }
+
+        /* Hover Action Items Container */
+        .history-item-container {
+            position: relative;
+            margin-bottom: 6px;
+        }
+        .history-item {
+            padding: 12px 40px 12px 12px;
+            background: transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: #94a3b8;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+            width: 100%;
+            text-align: left;
+        }
+        .history-item-container:hover .history-item {
+            background: #1f2026;
+            color: #f1f5f9;
+        }
+        
+        /* Three Dots Option Trigger Button */
+        .item-options-trigger {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            border: none;
+            color: #64748b;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: bold;
+            line-height: 1;
+            padding: 4px 6px;
+            display: none;
+            border-radius: 4px;
+        }
+        .history-item-container:hover .item-options-trigger {
+            display: block;
+        }
+        .item-options-trigger:hover {
+            color: #f1f5f9;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Custom Options Context Dropdown Box */
+        .options-dropdown {
+            position: absolute;
+            right: 12px;
+            top: 38px;
+            background: #181920;
+            border: 1px solid #2d3139;
+            border-radius: 8px;
+            width: 120px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            z-index: 100;
+            display: none;
+        }
+        .options-dropdown.active {
+            display: block;
+        }
+        .dropdown-opt {
+            padding: 10px 12px;
+            font-size: 0.85rem;
+            color: #94a3b8;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .dropdown-opt:hover {
+            background: #22242d;
+            color: #f1f5f9;
+        }
+        .dropdown-opt.opt-delete {
+            color: #ef4444;
+        }
+        .dropdown-opt.opt-delete:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .clear-history-btn {
+            padding: 12px;
+            background: transparent;
+            color: #64748b;
+            border: 1px dashed #2d3139;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+            width: 100%;
+        }
+        .clear-history-btn:hover {
+            background: rgba(239, 68, 68, 0.05);
+            color: #ef4444;
+            border-color: rgba(239, 68, 68, 0.2);
+        }
+
+        /* Main Center Processing Canvas Workspace Frame */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: #0b0c10;
+            position: relative;
+            height: 100%;
+            overflow: hidden;
+        }
+        .top-bar {
+            height: 70px;
+            min-height: 70px;
+            border-bottom: 1px solid #1f2026;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 40px;
+            background-color: #111217;
+            z-index: 10;
+        }
+        .top-bar h2 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            color: #f8fafc;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            user-select: none;
+        }
+        .top-bar h2::before {
+            content: '';
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #3b82f6;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #3b82f6;
+        }
+        .logout-btn {
+            background: transparent;
+            color: #94a3b8;
+            border: 1px solid #2d3139;
+            padding: 8px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .logout-btn:hover {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border-color: rgba(239, 68, 68, 0.2);
+        }
+
+        /* Centralized Main Greeting Hero Display Panel */
+        .welcome-hero {
+            position: absolute;
+            top: 42%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            width: 100%;
+            padding: 0 20px;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .welcome-hero h1 {
+            font-size: 2.2rem;
+            font-weight: 600;
+            color: #ffffff;
+            letter-spacing: -0.5px;
+        }
+
+        /* Messaging Render Area viewport bounds */
+        .chat-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 40px 18%;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            position: relative;
+            z-index: 2;
+        }
+        .message-wrapper {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+        .message {
+            max-width: 85%;
+            padding: 14px 20px;
+            border-radius: 16px;
+            line-height: 1.6;
+            font-size: 0.98rem;
+            word-wrap: break-word;
+        }
+        .user-wrapper { align-items: flex-end; }
+        .user-message { background-color: #272930; color: #ffffff; border-bottom-right-radius: 4px; }
+        .ai-wrapper { align-items: flex-start; }
+        .ai-message { background-color: #111217; color: #e2e8f0; border-bottom-left-radius: 4px; border: 1px solid #1f2026; }
+        
+        /* Code Block & Markdown Rendering Properties Layout fixes */
+        .ai-message pre { background: #0b0c10; padding: 14px; border-radius: 8px; overflow-x: auto; margin: 12px 0; border: 1px solid #1f2026; }
+        .ai-message code { font-family: 'Courier New', Courier, monospace; font-size: 0.9rem; background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 4px; }
+        .ai-message pre code { background: transparent; padding: 0; }
+        .ai-message p { margin-bottom: 8px; }
+        .ai-message p:last-child { margin-bottom: 0; }
+        .ai-message ul, .ai-message ol { margin-left: 20px; margin-bottom: 8px; }
+
+        .meta-stamp {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #3b82f6;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 6px;
+            padding: 2px 8px;
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: 4px;
+            display: inline-block;
+            width: fit-content;
+        }
+
+        /* Loading Dots Indicator Core Rules */
+        .thinking-container { display: flex; align-items: center; gap: 6px; padding: 4px 0; }
+        .thinking-dot { width: 6px; height: 6px; background: #94a3b8; border-radius: 50%; animation: bounce 1.4s infinite ease-in-out both; }
+        .thinking-dot:nth-child(1) { animation-delay: -0.32s; }
+        .thinking-dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1.0); } }
+
+        /* Input Deck Frame Layout Container Constraints */
+        .input-container {
+            padding: 24px 18% 36px 18%;
+            background: linear-gradient(180deg, transparent 0%, #0b0c10 50%);
+            z-index: 10;
+        }
+        .input-box-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            background: #111217;
+            border: 1px solid #1f2026;
+            border-radius: 28px;
+            padding: 6px 10px 6px 24px;
+            transition: all 0.2s ease;
+        }
+        .input-box-wrapper:focus-within {
+            border-color: #3b82f6;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.25);
+            background: #14161d;
+        }
+        input[type="text"] {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #f1f5f9;
+            font-size: 0.98rem;
+            outline: none;
+            padding: 12px 0;
+        }
+        input[type="text"]::placeholder { color: #4b5563; }
+        .execute-btn {
+            background: #3b82f6;
+            color: #ffffff;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .execute-btn:hover { background: #2563eb; transform: scale(1.05); }
+        .execute-btn svg {
+            width: 18px; height: 18px; fill: none; stroke: #ffffff;
+            stroke-width: 3; stroke-linecap: round; stroke-linejoin: round;
+        }
+        
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #1f2026; border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="new-chat-btn" onclick="startNewChat()">New Chat</div>
+        
+        <div class="recents-header" onclick="toggleRecentsPanel(event)">
+            <span class="history-label">Recents</span>
+            <svg class="collapse-arrow" id="recents-arrow" viewBox="0 0 24 24">
+                <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+        </div>
+        
+        <div id="history-list" class="history-list"></div>
+        <button class="clear-history-btn" onclick="clearAllChats()">Clear Chats</button>
+    </div>
+
+    <div class="main-content">
+        <div class="top-bar">
+            <h2>ERIS MAINFRAME</h2>
+            <a href="/logout" class="logout-btn">Logout</a>
+        </div>
+        
+        <div id="welcome-hero" class="welcome-hero">
+            <h1>What's on your mind?</h1>
+        </div>
+        
+        <div id="chat-area" class="chat-area"></div>
+        
+        <div class="input-container">
+            <div class="input-box-wrapper">
+                <input type="text" id="user-input" placeholder="Ask Eris anything..." onkeypress="handleKeyPress(event)">
+                <button class="execute-btn" onclick="sendPrompt()">
+                    <svg viewBox="0 0 24 24">
+                        <line x1="12" y1="19" x2="12" y2="5"></line>
+                        <polyline points="5 12 12 5 19 12"></polyline>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentSessionId = "";
+
+        function checkHeroVisibility() {
+            const hero = document.getElementById('welcome-hero');
+            const chatArea = document.getElementById('chat-area');
+            if (chatArea.children.length > 0) {
+                hero.style.display = 'none';
+            } else {
+                hero.style.display = 'block';
+            }
+        }
+
+        function toggleRecentsPanel(e) {
+            const arrow = document.getElementById('recents-arrow');
+            const list = document.getElementById('history-list');
+            arrow.classList.toggle('collapsed');
+            list.classList.toggle('hidden-pane');
+        }
+
+        async function loadSidebarHistory() {
+            try {
+                const response = await fetch('/api/history');
+                if (response.ok) {
+                    const histories = await response.json();
+                    const listContainer = document.getElementById('history-list');
+                    listContainer.innerHTML = '';
+                    
+                    histories.forEach(item => {
+                        const container = document.createElement('div');
+                        container.className = 'history-item-container';
+
+                        const itemDiv = document.createElement('div');
+                        itemDiv.className = 'history-item';
+                        itemDiv.innerText = item.title;
+                        itemDiv.onclick = () => selectSession(item.id);
+                        container.appendChild(itemDiv);
+
+                        const dotsBtn = document.createElement('button');
+                        dotsBtn.className = 'item-options-trigger';
+                        dotsBtn.innerHTML = '&#8943;';
+                        dotsBtn.onclick = (e) => {
+                            e.stopPropagation();
+                            toggleDropdownMenu(item.id);
+                        };
+                        container.appendChild(dotsBtn);
+
+                        const dropdown = document.createElement('div');
+                        dropdown.className = 'options-dropdown';
+                        dropdown.id = `dropdown-${item.id}`;
+                        dropdown.innerHTML = `
+                            <div class="dropdown-opt" onclick="renameChatThread('${item.id}', '${item.title.replace(/'/g, "\\'")}', event)">Rename</div>
+                            <div class="dropdown-opt opt-delete" onclick="deleteIndividualChat('${item.id}', event)">Delete</div>
+                        `;
+                        container.appendChild(dropdown);
+
+                        listContainer.appendChild(container);
+                    });
+                }
+            } catch (err) {
+                console.error("Failed to load historical vectors index", err);
+            }
+        }
+
+        function toggleDropdownMenu(sessionId) {
+            document.querySelectorAll('.options-dropdown').forEach(el => {
+                if(el.id !== `dropdown-${sessionId}`) el.classList.remove('active');
+            });
+            const menu = document.getElementById(`dropdown-${sessionId}`);
+            if (menu) menu.classList.toggle('active');
+        }
+
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.options-dropdown').forEach(el => el.classList.remove('active'));
+        });
+
+        async function renameChatThread(sessionId, oldTitle, e) {
+            e.stopPropagation();
+            const newTitle = prompt("Enter a new title for this conversation thread:", oldTitle);
+            if (!newTitle || !newTitle.trim()) return;
+            
+            try {
+                const response = await fetch(`/api/session/${sessionId}/rename`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title: newTitle.trim() })
+                });
+                if (response.ok) {
+                    loadSidebarHistory();
+                }
+            } catch (err) {
+                console.error("Failed adjusting title profile mappings", err);
+            }
+        }
+
+        async function deleteIndividualChat(sessionId, e) {
+            e.stopPropagation();
+            if (!confirm("Delete this chat thread completely?")) return;
+            
+            try {
+                const response = await fetch(`/api/session/${sessionId}`, { method: 'DELETE' });
+                if (response.ok) {
+                    if (currentSessionId === sessionId) {
+                        startNewChat();
+                    }
+                    loadSidebarHistory();
+                }
+            } catch (err) {
+                console.error("Failure pruning selected chat profile matrix", err);
+            }
+        }
+
+        async function clearAllChats() {
+            if (!confirm("Are you sure you want to delete your entire chat history?")) return;
+            try {
+                const response = await fetch('/api/history/clear', { method: 'POST' });
+                if (response.ok) {
+                    startNewChat();
+                    loadSidebarHistory();
+                }
+            } catch (err) {
+                console.error("Failed to clear conversation storage indexes", err);
+            }
+        }
+
+        async function selectSession(sessionId) {
+            currentSessionId = sessionId;
+            try {
+                const response = await fetch(`/api/session/${sessionId}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    const chatArea = document.getElementById('chat-area');
+                    chatArea.innerHTML = '';
+                    data.messages.forEach(msg => {
+                        renderMessage(msg.content, msg.role === 'user');
+                    });
+                    checkHeroVisibility();
+                }
+            } catch (err) {
+                console.error("Error matching profile database records", err);
+            }
+        }
+
+        function startNewChat() {
+            currentSessionId = "";
+            document.getElementById('chat-area').innerHTML = '';
+            checkHeroVisibility();
+        }
+
+        function handleKeyPress(e) {
+            if (e.key === 'Enter') sendPrompt();
+        }
+
+        async function sendPrompt() {
+            const inputEl = document.getElementById('user-input');
+            const prompt = inputEl.value.trim();
+            if (!prompt) return;
+
+            document.getElementById('welcome-hero').style.display = 'none';
+            renderMessage(prompt, true);
+            inputEl.value = '';
+
+            const loaderId = showThinkingIndicator();
+
+            try {
+                const response = await fetch('/ask', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: prompt, session_id: currentSessionId })
+                });
+                
+                removeThinkingIndicator(loaderId);
+
+                if (response.ok) {
+                    const result = await response.json();
+                    currentSessionId = result.session_id;
+                    renderMessage(result.response, false, result.model_used);
+                    loadSidebarHistory();
+                } else {
+                    renderMessage("Processing pipeline failed. Upstream routing error.", false);
+                }
+            } catch (err) {
+                removeThinkingIndicator(loaderId);
+                renderMessage("Unable to connect to active workspace server gateway.", false);
+            }
+        }
+
+        function showThinkingIndicator() {
+            const chatArea = document.getElementById('chat-area');
+            const id = 'loader-' + Date.now();
+            const wrapper = document.createElement('div');
+            wrapper.className = 'message-wrapper ai-wrapper';
+            wrapper.id = id;
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'message ai-message';
+            msgDiv.innerHTML = `
+                <div class="thinking-container">
+                    <div class="thinking-dot"></div>
+                    <div class="thinking-dot"></div>
+                    <div class="thinking-dot"></div>
+                </div>`;
+            wrapper.appendChild(msgDiv);
+            chatArea.appendChild(wrapper);
+            chatArea.scrollTop = chatArea.scrollHeight;
+            return id;
+        }
+
+        function removeThinkingIndicator(id) {
+            const loader = document.getElementById(id);
+            if (loader) loader.remove();
+        }
+
+        function renderMessage(text, isUser, modelInfo = "") {
+            const chatArea = document.getElementById('chat-area');
+            const wrapper = document.createElement('div');
+            wrapper.className = `message-wrapper ${isUser ? 'user-wrapper' : 'ai-wrapper'}`;
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
+            
+            if (isUser) {
+                msgDiv.innerText = text;
+            } else {
+                // Safely parsing AI response strings directly into beautiful rich Markdown components
+                msgDiv.innerHTML = marked.parse(text);
+            }
+            wrapper.appendChild(msgDiv);
+
+            if (!isUser && modelInfo) {
+                const meta = document.createElement('div');
+                meta.className = 'meta-stamp';
+                meta.innerText = modelInfo;
+                wrapper.appendChild(meta);
+            }
+
+            chatArea.appendChild(wrapper);
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+
+        window.onload = () => {
+            loadSidebarHistory();
+            checkHeroVisibility();
+        };
+    </script>
+</body>
+</html>
