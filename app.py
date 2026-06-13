@@ -15,10 +15,9 @@ app.secret_key = "eris_mainframe_secure_matrix_key_9918"
 
 # --- HARDCODED CREDENTIALS CONFIGURATION MATRIX ---
 # Paste your actual keys straight inside these quotes!
-GOOGLE_CLIENT_ID = "YOUR_LONG_GOOGLE_ID_HERE.apps.googleusercontent.com"
-GOOGLE_CLIENT_SECRET = "YOUR_LONG_GOOGLE_CLIENT_SECRET_HERE"
-OPENROUTER_API_KEY = "YOUR_OPENRO"
-
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
+GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 # Initialize Google Authlib Handshake Client Matrix
 oauth = OAuth(app)
 google = oauth.register(
