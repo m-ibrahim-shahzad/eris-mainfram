@@ -22,6 +22,9 @@ app.config["PREFERRED_URL_SCHEME"] = "https"
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+OPENROUTER_HTTP_REFERER = os.getenv(
+    "OPENROUTER_HTTP_REFERER", "https://eris-mainfram-production.up.railway.app")
+OPENROUTER_MODEL = os.getenv("OPENROUTER_MODEL", "openrouter/free")
 
 oauth = OAuth(app)
 google = oauth.register(
@@ -98,7 +101,9 @@ def clear_all_user_history():
             (google_id,),
         )
         cursor.execute(
-            "DELETE FROM sessions WHERE google_id = ?", (google_id,))
+            "DELETE FROM sessions WHERE google_id = ?",
+            (google_id,),
+        )
         conn.commit()
         conn.close()
         return jsonify({"success": True})
@@ -173,14 +178,16 @@ def rename_chat_session(session_id):
     if "user_profile" not in session:
         return jsonify({"error": "Unauthorized"}), 401
 
-    data = request.get_json()
+    data = request.get_json() or {}
     new_title = data.get("title", "Updated Chat")
 
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute("UPDATE sessions SET title = ? WHERE id = ?",
-                       (new_title, session_id))
+        cursor.execute(
+            "UPDATE sessions SET title = ? WHERE id = ?",
+            (new_title, session_id),
+        )
         conn.commit()
         conn.close()
         return jsonify({"success": True})
@@ -193,8 +200,11 @@ def process_ai_prompt():
     if "user_profile" not in session:
         return jsonify({"error": "Unauthorized"}), 401
 
+    if not OPENROUTER_API_KEY or OPENROUTER_API_KEY.startswith("YOUR_"):
+        return jsonify({"error": "Missing OPENROUTER_API_KEY"}), 500
+
     google_id = session["user_profile"]["sub"]
-    data = request.get_json()
+    data = request.get_json() or {}
     prompt = data.get("prompt", "").strip()
     session_id = data.get("session_id", "")
 
@@ -208,12 +218,23 @@ def process_ai_prompt():
 
     if not session_id:
         session_id = str(uuid.uuid4())
-
-    auto_title = prompt[:22] + "..." if len(prompt) > 22 else prompt
-    cursor.execute(
-        "INSERT INTO sessions (id, google_id, title) VALUES (?, ?, ?)",
-        (session_id, google_id, auto_title),
-    )
+        auto_title = prompt[:22] + "..." if len(prompt) > 22 else prompt
+        cursor.execute(
+            "INSERT INTO sessions (id, google_id, title) VALUES (?, ?, ?)",
+            (session_id, google_id, auto_title),
+        )
+    else:
+        cursor.execute(
+            "SELECT id FROM sessions WHERE id = ? AND google_id = ?",
+            (session_id, google_id),
+        )
+        existing = cursor.fetchone()
+        if not existing:
+            auto_title = prompt[:22] + "..." if len(prompt) > 22 else prompt
+            cursor.execute(
+                "INSERT INTO sessions (id, google_id, title) VALUES (?, ?, ?)",
+                (session_id, google_id, auto_title),
+            )
 
     cursor.execute(
         "INSERT INTO messages (session_id, role, content) VALUES (?, 'user', ?)",
@@ -233,11 +254,11 @@ def process_ai_prompt():
             headers={
                 "Authorization": f"Bearer {OPENROUTER_API_KEY}",
                 "Content-Type": "application/json",
-                "HTTP-Referer": "https://eris-mainfram-production.up.railway.app",
+                "HTTP-Referer": OPENROUTER_HTTP_REFERER,
                 "X-Title": "Eris Mainframe",
             },
             json={
-                "model": "openrouter/free",
+                "model": OPENROUTER_MODEL,
                 "messages": [
                     {"role": "system", "content": system_instruction},
                     {"role": "user", "content": prompt},
@@ -246,21 +267,27 @@ def process_ai_prompt():
             timeout=60,
         )
 
-        response_data = response.json()
+        print("OPENROUTER STATUS:", response.status_code)
+        print("OPENROUTER RAW:", response.text)
 
-        if "choices" in response_data and len(response_data["choices"]) > 0:
+        try:
+            response_data = response.json()
+        except Exception:
+            response_data = {}
+
+        if response.status_code == 200 and "choices" in response_data and len(response_data["choices"]) > 0:
             ai_response = response_data["choices"][0]["message"]["content"]
             model_badge = "ERIS-FREE-MATRIX"
         elif "error" in response_data:
             ai_response = f"Mainframe API authorization fault: {response_data['error'].get('message', 'Unknown API Error')}"
             model_badge = "API-ERROR-LOG"
         else:
-            ai_response = "Mainframe internal relay error. Received an unparseable response array."
+            ai_response = f"Mainframe internal relay error. Status {response.status_code}. Raw: {response.text[:300]}"
             model_badge = "PAYLOAD-FAULT"
 
     except Exception as e:
         print(f"Upstream free generation inference fault: {str(e)}")
-        ai_response = "Mainframe processing pipeline congestion. Live free AI channel failed to return text tokens."
+        ai_response = f"Mainframe processing pipeline congestion. Live free AI channel failed to return text tokens. Error: {str(e)}"
         model_badge = "ERROR-FALLBACK"
 
     cursor.execute(
@@ -270,7 +297,11 @@ def process_ai_prompt():
     conn.commit()
     conn.close()
 
-    return jsonify({"session_id": session_id, "response": ai_response, "model_used": model_badge})
+    return jsonify({
+        "session_id": session_id,
+        "response": ai_response,
+        "model_used": model_badge
+    })
 
 
 if __name__ == "__main__":
