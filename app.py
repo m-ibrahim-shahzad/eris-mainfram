@@ -22,10 +22,14 @@ app.config["PREFERRED_URL_SCHEME"] = "https"
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
-OPENROUTER_MODEL = os.getenv(
-    "OPENROUTER_MODEL", "qwen/qwen3-next-80b-a3b-instruct:free")
 OPENROUTER_HTTP_REFERER = os.getenv(
     "OPENROUTER_HTTP_REFERER", "https://eris-mainfram-production.up.railway.app")
+OPENROUTER_DEFAULT_MODEL = os.getenv(
+    "OPENROUTER_MODEL", "qwen/qwen3-next-80b-a3b-instruct:free")
+OPENROUTER_FALLBACK_MODEL = os.getenv(
+    "OPENROUTER_FALLBACK_MODEL", "meta-llama/llama-4-maverick:free")
+OPENROUTER_THIRD_MODEL = os.getenv(
+    "OPENROUTER_THIRD_MODEL", "google/gemma-2-9b-it:free")
 
 oauth = OAuth(app)
 google = oauth.register(
@@ -187,6 +191,63 @@ def rename_chat_session(session_id):
         return jsonify({"error": str(e)}), 500
 
 
+def _call_openrouter_with_fallbacks(system_instruction, prompt):
+    candidate_models = [
+        OPENROUTER_DEFAULT_MODEL,
+        OPENROUTER_FALLBACK_MODEL,
+        OPENROUTER_THIRD_MODEL,
+    ]
+
+    last_error = None
+
+    for model_name in candidate_models:
+        try:
+            response = requests.post(
+                url="https://openrouter.ai/api/v1/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+                    "Content-Type": "application/json",
+                    "HTTP-Referer": OPENROUTER_HTTP_REFERER,
+                    "X-Title": "Eris Mainframe",
+                },
+                json={
+                    "model": model_name,
+                    "messages": [
+                        {"role": "system", "content": system_instruction},
+                        {"role": "user", "content": prompt},
+                    ],
+                },
+                timeout=60,
+            )
+
+            print("OPENROUTER STATUS:", response.status_code)
+            print("OPENROUTER MODEL:", model_name)
+            print("OPENROUTER RAW:", response.text)
+
+            try:
+                response_data = response.json()
+            except Exception:
+                response_data = {}
+
+            if response.status_code == 200 and "choices" in response_data and len(response_data["choices"]) > 0:
+                return response_data["choices"][0]["message"]["content"], model_name
+
+            if "error" in response_data:
+                err_obj = response_data["error"]
+                if isinstance(err_obj, dict):
+                    last_error = err_obj.get("message", response.text)
+                else:
+                    last_error = str(err_obj)
+            else:
+                last_error = response.text
+
+        except Exception as e:
+            print(f"OPENROUTER EXCEPTION ON {model_name}: {str(e)}")
+            last_error = str(e)
+
+    return f"Mainframe API error: Provider returned error. Last detail: {last_error}", "API-ERROR-LOG"
+
+
 @app.route("/ask", methods=["POST"])
 def process_ai_prompt():
     if "user_profile" not in session:
@@ -274,41 +335,8 @@ def process_ai_prompt():
             f"[Historical Core Background Memory]:\n{retrieved_longterm_memory}"
         )
 
-        response = requests.post(
-            url="https://openrouter.ai/api/v1/chat/completions",
-            headers={
-                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-                "Content-Type": "application/json",
-                "HTTP-Referer": OPENROUTER_HTTP_REFERER,
-                "X-Title": "Eris Mainframe",
-            },
-            json={
-                "model": OPENROUTER_MODEL,
-                "messages": [
-                    {"role": "system", "content": system_instruction},
-                    {"role": "user", "content": prompt},
-                ],
-            },
-            timeout=60,
-        )
-
-        print("OPENROUTER STATUS:", response.status_code)
-        print("OPENROUTER RAW:", response.text)
-
-        try:
-            response_data = response.json()
-        except Exception:
-            response_data = {}
-
-        if response.status_code == 200 and "choices" in response_data and len(response_data["choices"]) > 0:
-            ai_response = response_data["choices"][0]["message"]["content"]
-            model_badge = "ERIS-FREE-MATRIX"
-        elif "error" in response_data:
-            ai_response = f"Mainframe API error: {response_data['error'].get('message', 'Unknown API Error')}"
-            model_badge = "API-ERROR-LOG"
-        else:
-            ai_response = f"Mainframe internal relay error. Status {response.status_code}. Raw: {response.text[:300]}"
-            model_badge = "PAYLOAD-FAULT"
+        ai_response, model_badge = _call_openrouter_with_fallbacks(
+            system_instruction, prompt)
 
         cursor.execute(
             "INSERT INTO messages (session_id, role, content) VALUES (?, 'assistant', ?)",
