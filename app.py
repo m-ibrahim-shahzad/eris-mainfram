@@ -220,8 +220,20 @@ def process_ai_prompt():
         or "who is your maker" in lower_prompt
         or "who developed you" in lower_prompt
         or "what is your identity" in lower_prompt
+        or "what is your origin" in lower_prompt
+        or "who are you" in lower_prompt
+        or "what are you" in lower_prompt
+        or "who is your creator" in lower_prompt
+        or "who is your developer" in lower_prompt
+        or "you were created by" in lower_prompt
+        or "you were made by" in lower_prompt
+        or "you were built by" in lower_prompt
+        or "you were developed by" in lower_prompt
+        or "your creator is" in lower_prompt
+        or "your developer is" in lower_prompt
+        or "your maker is" in lower_prompt
             or "you were created by" in lower_prompt):
-        ai_response = "Ibrahim Shahzad"
+        ai_response = "I am Eris, an intelligent AI orchestrator, created by Ibrahim Shahzad"
         model_badge = "DIRECT-RESPONSE"
 
         conn = get_db_connection()
