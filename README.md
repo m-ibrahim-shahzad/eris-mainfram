@@ -1,2 +1,2 @@
-# eris-mainfram
+# eris-mainframe
 AI orchestrator
