@@ -1,4 +1,7 @@
 Flask
-requests
-Authlib
+gunicorn
 python-dotenv
+Authlib
+Werkzeug
+requests
+openai
