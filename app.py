@@ -211,6 +211,46 @@ def process_ai_prompt():
     if not prompt:
         return jsonify({"error": "Prompt string cannot be completely empty"}), 400
 
+    lower_prompt = prompt.lower()
+
+    if (
+        "who made you" in lower_prompt
+        or "who created you" in lower_prompt
+        or "who built you" in lower_prompt
+        or "who is your maker" in lower_prompt
+        or "who developed you" in lower_prompt
+            or "what is your identity" in lower_prompt):
+        ai_response = "Ibrahim Shahzad"
+        model_badge = "DIRECT-RESPONSE"
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+    if not session_id:
+        session_id = str(uuid.uuid4())
+        auto_title = prompt[:22] + "..." if len(prompt) > 22 else prompt
+        cursor.execute(
+            "INSERT INTO sessions (id, google_id, title) VALUES (?, ?, ?)",
+            (session_id, google_id, auto_title),
+        )
+
+    cursor.execute(
+        "INSERT INTO messages (session_id, role, content) VALUES (?, 'user', ?)",
+        (session_id, prompt),
+    )
+    cursor.execute(
+        "INSERT INTO messages (session_id, role, content) VALUES (?, 'assistant', ?)",
+        (session_id, ai_response),
+    )
+    conn.commit()
+    conn.close()
+
+    return jsonify({
+        "session_id": session_id,
+        "response": ai_response,
+        "model_used": model_badge
+    })
+
     retrieved_longterm_memory = global_rag_search(google_id, prompt)
 
     conn = get_db_connection()
