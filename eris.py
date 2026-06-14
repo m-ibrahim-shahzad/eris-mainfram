@@ -4,21 +4,32 @@ import time
 from openai import OpenAI
 from classifier import classify_prompt
 
-OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
-OPENROUTER_SITE_URL = os.getenv(
-    "OPENROUTER_SITE_URL", "https://eris-mainfram-production.up.railway.app")
-OPENROUTER_APP_NAME = os.getenv(
-    "OPENROUTER_APP_NAME", "Eris Stateful Platform")
-OPENROUTER_MODEL = os.getenv(
-    "OPENROUTER_MODEL", "qwen/qwen3-next-80b-a3b-instruct:free")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 client = OpenAI(
-    base_url="https://openrouter.ai/api/v1",
-    api_key=OPENROUTER_API_KEY,
+    base_url="https://api.groq.com/openai/v1",
+    api_key=GROQ_API_KEY,
 )
 
+TASK_MODEL_MAP = {
+    "CODE": "qwen3-32b",
+    "MATH": "qwen3-32b",
+    "CREATIVE": "llama-3.3-70b-versatile",
+    "SUMMARY": "llama-3.1-8b-instant",
+    "AGENTIC": "llama-3.3-70b-versatile",
+    "TRANSLATION": "llama-3.3-70b-versatile",
+    "SEC_LOGS": "llama-3.1-8b-instant",
+    "DATA_ANALYSIS": "qwen3-32b",
+    "REASONING_LOGIC": "qwen3-32b",
+    "SYSTEM_ROLE": "llama-3.3-70b-versatile",
+    "DESIGN_UX": "llama-3.3-70b-versatile",
+    "BUSINESS_MARKETING": "llama-3.3-70b-versatile",
+    "GENERAL_CONVO": "llama-3.1-8b-instant",
+    "FACTUAL": "llama-3.3-70b-versatile",
+}
 
-def ask_openrouter(prompt, model_id, history_buffer):
+
+def ask_groq(prompt, model_id, history_buffer):
     try:
         messages_payload = [
             {
@@ -33,10 +44,7 @@ def ask_openrouter(prompt, model_id, history_buffer):
         response = client.chat.completions.create(
             model=model_id,
             messages=messages_payload,
-            extra_headers={
-                "HTTP-Referer": OPENROUTER_SITE_URL,
-                "X-Title": OPENROUTER_APP_NAME,
-            }
+            temperature=0.4,
         )
         return response.choices[0].message.content
     except Exception as e:
@@ -49,11 +57,8 @@ def route(prompt, history_buffer):
 
         CHARACTER_THRESHOLD = 15000
         if len(prompt) > CHARACTER_THRESHOLD:
-            print(
-                f"\n[Eris Orchestrator] LARGE PAYLOAD WARNING: {len(prompt)} characters detected.")
-            selected_model = "Long Context Model"
-            response_text = ask_openrouter(
-                prompt, OPENROUTER_MODEL, history_buffer)
+            selected_model = "qwen3-32b"
+            response_text = ask_groq(prompt, selected_model, history_buffer)
 
             history_buffer.append({"role": "user", "content": prompt})
             history_buffer.append(
@@ -73,47 +78,26 @@ def route(prompt, history_buffer):
         if not sub_prompts:
             sub_prompts = [prompt.strip()]
 
-        print(
-            f"\n[Eris Orchestrator] Stateful Processing: Resolving {len(sub_prompts)} intent branches.")
-
         final_responses = []
         executed_categories = []
         executed_models = []
 
-        model_display_names = {
-            "CODE": "Qwen 2.5 Coder (Auto-Routed)",
-            "MATH": "DeepSeek R1 Llama (Auto-Routed)",
-            "CREATIVE": "Gemma 2 27B (Auto-Routed)",
-            "SUMMARY": "Llama 3 8B (Auto-Routed)",
-            "AGENTIC": "Llama 3.3 70B (Auto-Routed)",
-            "TRANSLATION": "Qwen 2.5 72B (Auto-Routed)",
-            "SEC_LOGS": "Llama 3.1 8B (Auto-Routed)",
-            "DATA_ANALYSIS": "DeepSeek Data Engine (Auto-Routed)",
-            "REASONING_LOGIC": "DeepSeek R1 Reasoning (Auto-Routed)",
-            "SYSTEM_ROLE": "Llama Persona Engine (Auto-Routed)",
-            "DESIGN_UX": "Gemma Creative UI (Auto-Routed)",
-            "BUSINESS_MARKETING": "Mistral Business Pro (Auto-Routed)",
-            "GENERAL_CONVO": "Llama Chat Optimizer (Auto-Routed)",
-            "FACTUAL": "Llama General (Auto-Routed)"
-        }
-
         for i, sub_prompt in enumerate(sub_prompts):
             task_type = classify_prompt(sub_prompt)
-            selected_model = model_display_names.get(
-                task_type, "Llama General (Auto-Routed)")
-
-            print(
-                f"  ➔ Sub-task {i+1}: '{sub_prompt[:35]}...' ➔ Category: [{task_type}]")
+            selected_model = TASK_MODEL_MAP.get(
+                task_type, "llama-3.1-8b-instant")
 
             executed_categories.append(task_type)
             executed_models.append(selected_model)
 
-            response_text = ask_openrouter(
-                sub_prompt, OPENROUTER_MODEL, history_buffer)
+            response_text = ask_groq(
+                sub_prompt, selected_model, history_buffer)
 
-            if "ROUTE_FAILED" in response_text or "404" in response_text or "402" in response_text:
-                selected_model = "Eris Local Fail-Safe"
-                response_text = f"Connection restriction detected on OpenRouter endpoint. Details: {response_text}"
+            if "ROUTE_FAILED" in response_text:
+                fallback_model = "llama-3.1-8b-instant" if selected_model != "llama-3.1-8b-instant" else "llama-3.3-70b-versatile"
+                response_text = ask_groq(
+                    sub_prompt, fallback_model, history_buffer)
+                selected_model = fallback_model
 
             if len(sub_prompts) > 1:
                 formatted_chunk = f"### Part {i+1} [{task_type}]\n*{sub_prompt}\n\n{response_text}"
@@ -128,11 +112,8 @@ def route(prompt, history_buffer):
             {"role": "assistant", "content": merged_response})
 
         elapsed_time = round(time.time() - pipeline_start_time, 2)
-        print(
-            f"[Eris Orchestrator] Stateful Pipeline completed in {elapsed_time}s. Memory Depth: {len(history_buffer)} nodes.")
-
-        combined_tasks = " + ".join(set(executed_categories))
-        combined_models = f"{' & '.join(set(executed_models))} (Time: {elapsed_time}s)"
+        combined_tasks = " + ".join(sorted(set(executed_categories)))
+        combined_models = f"{' & '.join(sorted(set(executed_models)))} (Time: {elapsed_time}s)"
 
         return {
             "task_type": combined_tasks,
@@ -141,7 +122,6 @@ def route(prompt, history_buffer):
         }
 
     except Exception as general_error:
-        print(f"[CRITICAL ROUTE ERROR]: {str(general_error)}")
         return {
             "task_type": "ERROR_DIAGNOSTIC",
             "model_used": "System Diagnostics Engine",
