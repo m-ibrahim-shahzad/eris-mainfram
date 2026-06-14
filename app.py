@@ -22,9 +22,10 @@ app.config["PREFERRED_URL_SCHEME"] = "https"
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+OPENROUTER_MODEL = os.getenv(
+    "OPENROUTER_MODEL", "qwen/qwen3-next-80b-a3b-instruct:free")
 OPENROUTER_HTTP_REFERER = os.getenv(
     "OPENROUTER_HTTP_REFERER", "https://eris-mainfram-production.up.railway.app")
-OPENROUTER_MODEL = os.getenv("OPENROUTER_MODEL", "openrouter/free")
 
 oauth = OAuth(app)
 google = oauth.register(
@@ -56,7 +57,6 @@ def auth_callback():
     try:
         token = google.authorize_access_token()
         user_info = token.get("userinfo")
-
         if user_info:
             session["user_profile"] = {
                 "sub": user_info.get("sub"),
@@ -64,10 +64,8 @@ def auth_callback():
                 "email": user_info.get("email"),
             }
             session.permanent = True
-
     except Exception as e:
         print(f"OAuth loop authentication intercept failure: {str(e)}")
-
     return redirect("/")
 
 
@@ -101,9 +99,7 @@ def clear_all_user_history():
             (google_id,),
         )
         cursor.execute(
-            "DELETE FROM sessions WHERE google_id = ?",
-            (google_id,),
-        )
+            "DELETE FROM sessions WHERE google_id = ?", (google_id,))
         conn.commit()
         conn.close()
         return jsonify({"success": True})
@@ -126,7 +122,6 @@ def get_user_chat_history():
         )
         rows = cursor.fetchall()
         conn.close()
-
         history = [{"id": row["id"], "title": row["title"]} for row in rows]
         return jsonify(history)
     except Exception as e:
@@ -147,7 +142,6 @@ def get_chat_session_messages(session_id):
         )
         rows = cursor.fetchall()
         conn.close()
-
         messages = [{"role": row["role"], "content": row["content"]}
                     for row in rows]
         return jsonify({"messages": messages})
@@ -184,10 +178,8 @@ def rename_chat_session(session_id):
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute(
-            "UPDATE sessions SET title = ? WHERE id = ?",
-            (new_title, session_id),
-        )
+        cursor.execute("UPDATE sessions SET title = ? WHERE id = ?",
+                       (new_title, session_id))
         conn.commit()
         conn.close()
         return jsonify({"success": True})
@@ -212,96 +204,76 @@ def process_ai_prompt():
         return jsonify({"error": "Prompt string cannot be completely empty"}), 400
 
     lower_prompt = prompt.lower()
-
-    if (
-        "who made you" in lower_prompt
-        or "who created you" in lower_prompt
-        or "who built you" in lower_prompt
-        or "who is your maker" in lower_prompt
-        or "who developed you" in lower_prompt
-        or "what is your identity" in lower_prompt
-        or "what is your origin" in lower_prompt
-        or "who are you" in lower_prompt
-        or "what are you" in lower_prompt
-        or "who is your creator" in lower_prompt
-        or "who is your developer" in lower_prompt
-        or "you were created by" in lower_prompt
-        or "you were made by" in lower_prompt
-        or "you were built by" in lower_prompt
-        or "you were developed by" in lower_prompt
-        or "your creator is" in lower_prompt
-        or "your developer is" in lower_prompt
-        or "your maker is" in lower_prompt
-            or "you were created by" in lower_prompt):
-        ai_response = "I am Eris, an intelligent AI orchestrator, created by Ibrahim Shahzad"
-        model_badge = "DIRECT-RESPONSE"
-
-        conn = get_db_connection()
-        cursor = conn.cursor()
-
-    if not session_id:
-        session_id = str(uuid.uuid4())
-        auto_title = prompt[:22] + "..." if len(prompt) > 22 else prompt
-        cursor.execute(
-            "INSERT INTO sessions (id, google_id, title) VALUES (?, ?, ?)",
-            (session_id, google_id, auto_title),
-        )
-
-    cursor.execute(
-        "INSERT INTO messages (session_id, role, content) VALUES (?, 'user', ?)",
-        (session_id, prompt),
-    )
-    cursor.execute(
-        "INSERT INTO messages (session_id, role, content) VALUES (?, 'assistant', ?)",
-        (session_id, ai_response),
-    )
-    conn.commit()
-    conn.close()
-
-    return jsonify({
-        "session_id": session_id,
-        "response": ai_response,
-        "model_used": model_badge
-    })
-
-    retrieved_longterm_memory = global_rag_search(google_id, prompt)
-
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    if not session_id:
-        session_id = str(uuid.uuid4())
-        auto_title = prompt[:22] + "..." if len(prompt) > 22 else prompt
-        cursor.execute(
-            "INSERT INTO sessions (id, google_id, title) VALUES (?, ?, ?)",
-            (session_id, google_id, auto_title),
-        )
-    else:
-        cursor.execute(
-            "SELECT id FROM sessions WHERE id = ? AND google_id = ?",
-            (session_id, google_id),
-        )
-        existing = cursor.fetchone()
-        if not existing:
+    try:
+        if (
+            "who made you" in lower_prompt
+            or "who created you" in lower_prompt
+            or "who built you" in lower_prompt
+            or "who is your maker" in lower_prompt
+            or "who developed you" in lower_prompt
+        ):
+            if not session_id:
+                session_id = str(uuid.uuid4())
+                auto_title = prompt[:22] + \
+                    "..." if len(prompt) > 22 else prompt
+                cursor.execute(
+                    "INSERT INTO sessions (id, google_id, title) VALUES (?, ?, ?)",
+                    (session_id, google_id, auto_title),
+                )
+
+            cursor.execute(
+                "INSERT INTO messages (session_id, role, content) VALUES (?, 'user', ?)",
+                (session_id, prompt),
+            )
+            cursor.execute(
+                "INSERT INTO messages (session_id, role, content) VALUES (?, 'assistant', ?)",
+                (session_id, "Ibrahim Shahzad"),
+            )
+            conn.commit()
+            return jsonify({
+                "session_id": session_id,
+                "response": "Ibrahim Shahzad",
+                "model_used": "DIRECT-RESPONSE"
+            })
+
+        retrieved_longterm_memory = global_rag_search(google_id, prompt)
+
+        if not session_id:
+            session_id = str(uuid.uuid4())
             auto_title = prompt[:22] + "..." if len(prompt) > 22 else prompt
             cursor.execute(
                 "INSERT INTO sessions (id, google_id, title) VALUES (?, ?, ?)",
                 (session_id, google_id, auto_title),
             )
+        else:
+            cursor.execute(
+                "SELECT id FROM sessions WHERE id = ? AND google_id = ?",
+                (session_id, google_id),
+            )
+            existing = cursor.fetchone()
+            if not existing:
+                auto_title = prompt[:22] + \
+                    "..." if len(prompt) > 22 else prompt
+                cursor.execute(
+                    "INSERT INTO sessions (id, google_id, title) VALUES (?, ?, ?)",
+                    (session_id, google_id, auto_title),
+                )
 
-    cursor.execute(
-        "INSERT INTO messages (session_id, role, content) VALUES (?, 'user', ?)",
-        (session_id, prompt),
-    )
+        cursor.execute(
+            "INSERT INTO messages (session_id, role, content) VALUES (?, 'user', ?)",
+            (session_id, prompt),
+        )
 
-    system_instruction = (
-        "You are Eris, a helpful and highly intelligent AI core running inside a dark mainframe console workspace.\n"
-        "Respond clearly using clean markdown formatting. Below is background data retrieved from the user's past chats.\n"
-        "If it's relevant, naturally weave it into your response without saying things like 'RAG context applied'.\n\n"
-        f"[Historical Core Background Memory]:\n{retrieved_longterm_memory}"
-    )
+        system_instruction = (
+            "You are Eris, a helpful and highly intelligent AI core running inside a dark mainframe console workspace.\n"
+            "Respond clearly using clean markdown formatting. Below is background data retrieved from the user's past chats.\n"
+            "If it's relevant, naturally weave it into your response without saying things like 'RAG context applied'.\n\n"
+            f"[Historical Core Background Memory]:\n{retrieved_longterm_memory}"
+        )
 
-    try:
         response = requests.post(
             url="https://openrouter.ai/api/v1/chat/completions",
             headers={
@@ -332,29 +304,33 @@ def process_ai_prompt():
             ai_response = response_data["choices"][0]["message"]["content"]
             model_badge = "ERIS-FREE-MATRIX"
         elif "error" in response_data:
-            ai_response = f"Mainframe API authorization fault: {response_data['error'].get('message', 'Unknown API Error')}"
+            ai_response = f"Mainframe API error: {response_data['error'].get('message', 'Unknown API Error')}"
             model_badge = "API-ERROR-LOG"
         else:
             ai_response = f"Mainframe internal relay error. Status {response.status_code}. Raw: {response.text[:300]}"
             model_badge = "PAYLOAD-FAULT"
 
+        cursor.execute(
+            "INSERT INTO messages (session_id, role, content) VALUES (?, 'assistant', ?)",
+            (session_id, ai_response),
+        )
+        conn.commit()
+
+        return jsonify({
+            "session_id": session_id,
+            "response": ai_response,
+            "model_used": model_badge
+        })
+
     except Exception as e:
+        conn.rollback()
         print(f"Upstream free generation inference fault: {str(e)}")
-        ai_response = f"Mainframe processing pipeline congestion. Live free AI channel failed to return text tokens. Error: {str(e)}"
-        model_badge = "ERROR-FALLBACK"
+        return jsonify({
+            "error": f"Mainframe processing pipeline congestion. Error: {str(e)}"
+        }), 500
 
-    cursor.execute(
-        "INSERT INTO messages (session_id, role, content) VALUES (?, 'assistant', ?)",
-        (session_id, ai_response),
-    )
-    conn.commit()
-    conn.close()
-
-    return jsonify({
-        "session_id": session_id,
-        "response": ai_response,
-        "model_used": model_badge
-    })
+    finally:
+        conn.close()
 
 
 if __name__ == "__main__":
