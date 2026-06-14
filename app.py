@@ -219,7 +219,8 @@ def process_ai_prompt():
         or "who built you" in lower_prompt
         or "who is your maker" in lower_prompt
         or "who developed you" in lower_prompt
-            or "what is your identity" in lower_prompt):
+        or "what is your identity" in lower_prompt
+            or "you were created by" in lower_prompt):
         ai_response = "Ibrahim Shahzad"
         model_badge = "DIRECT-RESPONSE"
 
