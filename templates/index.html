@@ -439,6 +439,11 @@
             background: #22242d;
             color: #f1f5f9;
         }
+        .account-menu-item.active-session {
+            background: rgba(168, 85, 247, 0.15);
+            color: #ffffff;
+            font-weight: 500;
+        }
         .account-menu-item.item-logout {
             border-top: 1px solid #2d3139;
             border-radius: 0 0 8px 8px;
@@ -864,6 +869,13 @@
             <div id="history-list" class="history-list"></div>
 
             <div class="account-popup-menu" id="account-popup-menu">
+                {% if 'user_profile' in session %}
+                    <div class="account-menu-item active-session">
+                        <img class="profile-avatar" style="width: 20px; height: 20px; margin-right: 2px;" src="{{ session['user_profile'].get('picture', '') }}" alt="avatar" onerror="this.src='https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';">
+                        <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ session['user_profile'].get('email', '') }}</span>
+                    </div>
+                {% endif %}
+                
                 <a href="/login" class="account-menu-item">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
                     Add Account
