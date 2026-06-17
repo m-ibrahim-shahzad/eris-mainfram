@@ -242,9 +242,8 @@
             border-radius: 50%;
             box-shadow: 0 0 10px #3b82f6;
         }
-        .logout-btn {
+        .auth-toggle-btn {
             background: transparent;
-            color: #94a3b8;
             border: 1px solid #2d3139;
             padding: 8px 16px;
             border-radius: 8px;
@@ -253,7 +252,17 @@
             font-weight: 500;
             transition: all 0.2s;
         }
-        .logout-btn:hover {
+        .auth-toggle-btn.btn-login {
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+        .auth-toggle-btn.btn-login:hover {
+            background: rgba(59, 130, 246, 0.1);
+        }
+        .auth-toggle-btn.btn-logout {
+            color: #94a3b8;
+        }
+        .auth-toggle-btn.btn-logout:hover {
             background: rgba(239, 68, 68, 0.1);
             color: #ef4444;
             border-color: rgba(239, 68, 68, 0.2);
@@ -504,7 +513,11 @@
         <div class="top-bar">
             <button class="sidebar-toggle-btn" onclick="toggleSidebar()">☰</button>
             <h2>ERIS MAINFRAME</h2>
-            <a href="/logout" class="logout-btn">Logout</a>
+            {% if 'user_profile' in session %}
+                <a href="/logout" class="auth-toggle-btn btn-logout">Logout</a>
+            {% else %}
+                <a href="/login" class="auth-toggle-btn btn-login">Login</a>
+            {% endif %}
         </div>
         
         <div id="welcome-hero" class="welcome-hero">

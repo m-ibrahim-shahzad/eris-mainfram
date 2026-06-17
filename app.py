@@ -33,11 +33,19 @@ google = oauth.register(
 
 init_db()
 
+def get_current_user_id():
+    """Helper to return either the Google sub ID or a unique guest ID."""
+    if "user_profile" in session:
+        return session["user_profile"]["sub"]
+    if "guest_id" not in session:
+        session["guest_id"] = f"guest_{uuid.uuid4()}"
+        session.permanent = True
+    return session["guest_id"]
+
 
 @app.route("/")
 def index():
-    if "user_profile" not in session:
-        return render_template("login.html")
+    # Always render the mainframe; Jinja will handle login/logout button toggles
     return render_template("index.html")
 
 
@@ -82,19 +90,16 @@ def logout():
 
 @app.route("/api/history/clear", methods=["POST", "DELETE"])
 def clear_all_user_history():
-    if "user_profile" not in session:
-        return jsonify({"error": "Unauthorized"}), 401
-
-    google_id = session["user_profile"]["sub"]
+    user_id = get_current_user_id()
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute(
             "DELETE FROM messages WHERE session_id IN (SELECT id FROM sessions WHERE google_id = ?)",
-            (google_id,),
+            (user_id,),
         )
         cursor.execute(
-            "DELETE FROM sessions WHERE google_id = ?", (google_id,))
+            "DELETE FROM sessions WHERE google_id = ?", (user_id,))
         conn.commit()
         conn.close()
         return jsonify({"success": True})
@@ -104,16 +109,13 @@ def clear_all_user_history():
 
 @app.route("/api/history", methods=["GET"])
 def get_user_chat_history():
-    if "user_profile" not in session:
-        return jsonify({"error": "Unauthorized"}), 401
-
-    google_id = session["user_profile"]["sub"]
+    user_id = get_current_user_id()
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute(
             "SELECT id, title FROM sessions WHERE google_id = ? ORDER BY created_at DESC",
-            (google_id,),
+            (user_id,),
         )
         rows = cursor.fetchall()
         conn.close()
@@ -125,9 +127,6 @@ def get_user_chat_history():
 
 @app.route("/api/session/<session_id>", methods=["GET"])
 def get_chat_session_messages(session_id):
-    if "user_profile" not in session:
-        return jsonify({"error": "Unauthorized"}), 401
-
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -146,9 +145,6 @@ def get_chat_session_messages(session_id):
 
 @app.route("/api/session/<session_id>", methods=["DELETE"])
 def delete_single_chat(session_id):
-    if "user_profile" not in session:
-        return jsonify({"error": "Unauthorized"}), 401
-
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -164,9 +160,6 @@ def delete_single_chat(session_id):
 
 @app.route("/api/session/<session_id>/rename", methods=["POST"])
 def rename_chat_session(session_id):
-    if "user_profile" not in session:
-        return jsonify({"error": "Unauthorized"}), 401
-
     data = request.get_json() or {}
     new_title = data.get("title", "Updated Chat")
 
@@ -184,10 +177,7 @@ def rename_chat_session(session_id):
 
 @app.route("/ask", methods=["POST"])
 def process_ai_prompt():
-    if "user_profile" not in session:
-        return jsonify({"error": "Unauthorized"}), 401
-
-    google_id = session["user_profile"]["sub"]
+    user_id = get_current_user_id()
     data = request.get_json() or {}
     prompt = data.get("prompt", "").strip()
     session_id = data.get("session_id", "")
@@ -204,12 +194,12 @@ def process_ai_prompt():
             auto_title = prompt[:22] + "..." if len(prompt) > 22 else prompt
             cursor.execute(
                 "INSERT INTO sessions (id, google_id, title) VALUES (?, ?, ?)",
-                (session_id, google_id, auto_title),
+                (session_id, user_id, auto_title),
             )
         else:
             cursor.execute(
                 "SELECT id FROM sessions WHERE id = ? AND google_id = ?",
-                (session_id, google_id),
+                (session_id, user_id),
             )
             existing = cursor.fetchone()
             if not existing:
@@ -217,7 +207,7 @@ def process_ai_prompt():
                     "..." if len(prompt) > 22 else prompt
                 cursor.execute(
                     "INSERT INTO sessions (id, google_id, title) VALUES (?, ?, ?)",
-                    (session_id, google_id, auto_title),
+                    (session_id, user_id, auto_title),
                 )
 
         cursor.execute(
