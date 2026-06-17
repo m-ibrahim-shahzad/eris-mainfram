@@ -21,7 +21,7 @@
             overflow: hidden;
         }
         
-        /* Sidebar Layout Container */
+        /* Sidebar Layout Container with Collapsible Width Engine */
         .sidebar {
             width: 280px;
             min-width: 280px;
@@ -31,18 +31,44 @@
             flex-direction: column;
             padding: 24px 16px 16px 16px;
             height: 100%;
-            transition: transform 0.25s ease;
+            transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), width 0.25s cubic-bezier(0.16, 1, 0.3, 1), min-width 0.25s cubic-bezier(0.16, 1, 0.3, 1), padding 0.25s cubic-bezier(0.16, 1, 0.3, 1);
             position: relative;
+            overflow: hidden;
+        }
+        
+        /* Desktop Sidebar Collapse State */
+        body.sidebar-collapsed .sidebar {
+            width: 0;
+            min-width: 0;
+            padding: 24px 0 16px 0;
+            border-right: 1px solid transparent;
+        }
+
+        /* Elements inside sidebar get a minor wrapper to prevent structural text squeezing during crunch animations */
+        .sidebar-inner-wrapper {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            width: 248px; /* Fixed matching width minus internal paddings */
+            flex-shrink: 0;
+        }
+
+        .sidebar-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            width: 100%;
         }
         
         .new-chat-btn {
             background: #ffffff;
             color: #111217;
-            padding: 14px;
+            padding: 12px 16px;
             border-radius: 12px;
+            flex: 1;
             text-align: center;
             cursor: pointer;
-            margin-bottom: 24px;
             font-weight: 600;
             font-size: 0.95rem;
             transition: all 0.2s ease;
@@ -52,6 +78,53 @@
             background: #f1f5f9;
             transform: translateY(-1px);
             box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+        }
+
+        /* NEW: Beautiful Sidebar Toggle Layout (ChatGPT Style Layout Framework) */
+        .desktop-toggle-btn {
+            background: transparent;
+            border: 1px solid #1f2026;
+            color: #64748b;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-left: 8px;
+        }
+        .desktop-toggle-btn:hover {
+            background: #1f2026;
+            color: #f1f5f9;
+            border-color: #2d3139;
+        }
+
+        /* Float appearance configuration when hidden */
+        .floating-open-btn {
+            position: absolute;
+            top: 14px;
+            left: 16px;
+            z-index: 40;
+            background: #111217;
+            border: 1px solid #1f2026;
+            color: #94a3b8;
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .floating-open-btn:hover {
+            background: #1f2026;
+            color: #f1f5f9;
+        }
+        body.sidebar-collapsed .floating-open-btn {
+            display: flex;
         }
         
         /* Interactive Recents Segment Bar Header */
@@ -183,7 +256,7 @@
             background: rgba(239, 68, 68, 0.1);
         }
 
-        /* NEW: Sidebar bottom profile trigger deck design mappings */
+        /* Sidebar bottom profile trigger deck design mappings */
         .account-profile-trigger {
             display: flex;
             align-items: center;
@@ -223,7 +296,7 @@
             text-overflow: ellipsis;
         }
 
-        /* NEW: Account Context Dropdown Panel structure rules */
+        /* Account Context Dropdown Panel structure rules */
         .account-popup-menu {
             position: absolute;
             bottom: 74px;
@@ -278,7 +351,14 @@
             position: relative;
             height: 100%;
             overflow: hidden;
+            transition: padding-left 0.25s ease;
         }
+        
+        /* Creates an elegant alignment shift when floating trigger is rendered */
+        body.sidebar-collapsed .top-bar {
+            padding-left: 72px; 
+        }
+
         .top-bar {
             height: 70px;
             min-height: 70px;
@@ -289,6 +369,7 @@
             background-color: #111217;
             z-index: 10;
             gap: 12px;
+            transition: padding-left 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .top-bar h2 {
             font-size: 1.1rem;
@@ -479,7 +560,7 @@
                 height: 100vh;
                 height: -webkit-fill-available;
                 width: 82vw;
-                min-width: 82vw;
+                min-width: 82vw !important;
                 max-width: 320px;
                 transform: translateX(-100%);
                 box-shadow: 12px 0 30px rgba(0,0,0,0.45);
@@ -491,10 +572,32 @@
                 transform: translateX(0);
             }
 
+            body.sidebar-collapsed .sidebar {
+                width: 82vw;
+                min-width: 82vw !important;
+                padding: 18px 16px 16px 16px;
+            }
+
+            .floating-open-btn {
+                display: none !important;
+            }
+
+            .sidebar-inner-wrapper {
+                width: 100%;
+            }
+
+            .desktop-toggle-btn {
+                display: none;
+            }
+
             .main-content {
                 width: 100vw;
                 height: 100vh;
                 height: -webkit-fill-available;
+            }
+
+            body.sidebar-collapsed .top-bar {
+                padding-left: 14px;
             }
 
             .top-bar {
@@ -564,46 +667,66 @@
 </head>
 <body>
 
+    <div class="floating-open-btn" onclick="toggleSidebarView()" title="Show Sidebar">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="9" y1="3" x2="9" y2="21"></line>
+            <polyline points="14 9 17 12 14 15"></polyline>
+        </svg>
+    </div>
+
     <div class="sidebar">
-        <div class="new-chat-btn" onclick="startNewChat()">New Chat</div>
-        
-        <div class="recents-header" onclick="toggleRecentsPanel(event)">
-            <span class="history-label">Recents</span>
-            <svg class="collapse-arrow" id="recents-arrow" viewBox="0 0 24 24">
-                <polyline points="6 9 12 15 18 9"></polyline>
-            </svg>
-        </div>
-        
-        <div id="history-list" class="history-list"></div>
-
-        <div class="account-popup-menu" id="account-popup-menu">
-            <a href="/login" class="account-menu-item">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
-                Add Account
-            </a>
-            <a href="/logout" class="account-menu-item item-logout" style="color: #ef4444;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-                Log Out
-            </a>
-        </div>
-
-        {% if 'user_profile' in session %}
-        <div class="account-profile-trigger" onclick="toggleAccountMenu(event)">
-            <img class="profile-avatar" src="{{ session['user_profile'].get('picture', '') }}" alt="avatar" onerror="this.src='https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';">
-            <div class="profile-info">
-                <div class="profile-name">{{ session['user_profile'].get('name', 'Mainframe Pilot') }}</div>
+        <div class="sidebar-inner-wrapper">
+            
+            <div class="sidebar-header-row">
+                <div class="new-chat-btn" onclick="startNewChat()">New Chat</div>
+                <button class="desktop-toggle-btn" onclick="toggleSidebarView()" title="Hide Sidebar">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="9" y1="3" x2="9" y2="21"></line>
+                        <polyline points="16 15 13 12 16 9"></polyline>
+                    </svg>
+                </button>
             </div>
-            <span style="color: #64748b; font-size: 0.8rem;">&#9652;</span>
-        </div>
-        {% else %}
-        <a href="/login" class="account-profile-trigger">
-            <div class="profile-avatar" style="display: flex; align-items: center; justify-content: center; color: #64748b; font-size: 1.1rem;">&#128100;</div>
-            <div class="profile-info">
-                <div class="profile-name">Guest Terminal</div>
+            
+            <div class="recents-header" onclick="toggleRecentsPanel(event)">
+                <span class="history-label">Recents</span>
+                <svg class="collapse-arrow" id="recents-arrow" viewBox="0 0 24 24">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
             </div>
-            <span style="color: #3b82f6; font-size: 0.85rem; font-weight: 600;">Login</span>
-        </a>
-        {% endif %}
+            
+            <div id="history-list" class="history-list"></div>
+
+            <div class="account-popup-menu" id="account-popup-menu">
+                <a href="/login" class="account-menu-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+                    Add Account
+                </a>
+                <a href="/logout" class="account-menu-item item-logout" style="color: #ef4444;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                    Log Out
+                </a>
+            </div>
+
+            {% if 'user_profile' in session %}
+            <div class="account-profile-trigger" onclick="toggleAccountMenu(event)">
+                <img class="profile-avatar" src="{{ session['user_profile'].get('picture', '') }}" alt="avatar" onerror="this.src='https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';">
+                <div class="profile-info">
+                    <div class="profile-name">{{ session['user_profile'].get('name', 'Mainframe Pilot') }}</div>
+                </div>
+                <span style="color: #64748b; font-size: 0.8rem;">&#9652;</span>
+            </div>
+            {% else %}
+            <a href="/login" class="account-profile-trigger">
+                <div class="profile-avatar" style="display: flex; align-items: center; justify-content: center; color: #64748b; font-size: 1.1rem;">&#128100;</div>
+                <div class="profile-info">
+                    <div class="profile-name">Guest Terminal</div>
+                </div>
+                <span style="color: #3b82f6; font-size: 0.85rem; font-weight: 600;">Login</span>
+            </a>
+            {% endif %}
+        </div>
     </div>
 
 
@@ -637,8 +760,14 @@
         let currentSessionId = "";
         let isTypingActive = false;
 
+        // Mobile responsive side drawer action toggle
         function toggleSidebar() {
             document.body.classList.toggle('sidebar-open');
+        }
+
+        // NEW: Handles desktop widescreen sidebar hide/collapse modes
+        function toggleSidebarView() {
+            document.body.classList.toggle('sidebar-collapsed');
         }
 
         function checkHeroVisibility() {
@@ -658,7 +787,6 @@
             list.classList.toggle('hidden-pane');
         }
 
-        /* NEW: Controls Account Sub menu slide deck toggling states */
         function toggleAccountMenu(e) {
             e.stopPropagation();
             const menu = document.getElementById('account-popup-menu');
@@ -717,7 +845,6 @@
             if (menu) menu.classList.toggle('active');
         }
 
-        // Global dismiss interactions hook
         document.addEventListener('click', () => {
             document.querySelectorAll('.options-dropdown').forEach(el => el.classList.remove('active'));
             const accMenu = document.getElementById('account-popup-menu');
