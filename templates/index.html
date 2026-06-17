@@ -338,12 +338,30 @@
             width: fit-content;
         }
 
-        /* Loading Dots Indicator Core Rules */
-        .thinking-container { display: flex; align-items: center; gap: 6px; padding: 4px 0; }
-        .thinking-dot { width: 6px; height: 6px; background: #94a3b8; border-radius: 50%; animation: bounce 1.4s infinite ease-in-out both; }
-        .thinking-dot:nth-child(1) { animation-delay: -0.32s; }
-        .thinking-dot:nth-child(2) { animation-delay: -0.16s; }
-        @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1.0); } }
+        /* NEW Cyberpunk Neon Pulse Loading Bar indicator rules (replaces boring dots) */
+        .quantum-loader-bar {
+            width: 140px;
+            height: 4px;
+            background: #1f2026;
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+            margin: 6px 0;
+        }
+        .quantum-loader-progress {
+            width: 40%;
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #60a5fa);
+            box-shadow: 0 0 8px #3b82f6;
+            border-radius: 4px;
+            position: absolute;
+            left: -40%;
+            animation: quantumShift 1.2s infinite linear;
+        }
+        @keyframes quantumShift {
+            0% { left: -40%; }
+            100% { left: 100%; }
+        }
 
         /* Input Deck Frame Layout Container Constraints */
         .input-container {
@@ -474,7 +492,6 @@
                 max-width: 94%;
             }
 
-            /* Shifted prompt wrapper upward & appended dynamic environment safe padding rules */
             .input-container {
                 padding: 10px 12px calc(16px + env(safe-area-inset-bottom));
                 background: #0b0c10;
@@ -486,7 +503,7 @@
 
             input[type="text"] {
                 padding: 10px 0;
-                font-size: 1rem; /* Prevents iOS auto-zoom shift faults */
+                font-size: 1rem;
             }
 
             .welcome-hero h1 {
@@ -555,6 +572,7 @@
 
     <script>
         let currentSessionId = "";
+        let isTypingActive = false; // Prevents overlapping concurrent print renders
 
         function toggleSidebar() {
             document.body.classList.toggle('sidebar-open');
@@ -687,6 +705,7 @@
         }
 
         async function selectSession(sessionId) {
+            if (isTypingActive) return; // Locks input during print streams
             currentSessionId = sessionId;
             try {
                 const response = await fetch(`/api/session/${sessionId}`);
@@ -695,7 +714,7 @@
                     const chatArea = document.getElementById('chat-area');
                     chatArea.innerHTML = '';
                     data.messages.forEach(msg => {
-                        renderMessage(msg.content, msg.role === 'user');
+                        renderMessage(msg.content, msg.role === 'user', "", false);
                     });
                     checkHeroVisibility();
                     if (window.innerWidth <= 768) document.body.classList.remove('sidebar-open');
@@ -706,6 +725,7 @@
         }
 
         function startNewChat() {
+            if (isTypingActive) return;
             currentSessionId = "";
             document.getElementById('chat-area').innerHTML = '';
             checkHeroVisibility();
@@ -717,18 +737,16 @@
         }
 
         async function sendPrompt() {
+            if (isTypingActive) return;
             const inputEl = document.getElementById('user-input');
             const prompt = inputEl.value.trim();
             if (!prompt) return;
 
-
             document.getElementById('welcome-hero').style.display = 'none';
-            renderMessage(prompt, true);
+            renderMessage(prompt, true, "", false);
             inputEl.value = '';
 
-
             const loaderId = showThinkingIndicator();
-
 
             try {
                 const response = await fetch('/ask', {
@@ -739,18 +757,18 @@
                 
                 removeThinkingIndicator(loaderId);
 
-
                 if (response.ok) {
                     const result = await response.json();
                     currentSessionId = result.session_id;
-                    renderMessage(result.response, false, result.model_used);
+                    // Triggers the fluid simulated typewriter print sequence
+                    renderMessage(result.response, false, result.model_used, true);
                     loadSidebarHistory();
                 } else {
-                    renderMessage("Processing pipeline failed. Upstream routing error.", false);
+                    renderMessage("Processing pipeline failed. Upstream routing error.", false, "", false);
                 }
             } catch (err) {
                 removeThinkingIndicator(loaderId);
-                renderMessage("Unable to connect to active workspace server gateway.", false);
+                renderMessage("Unable to connect to active workspace server gateway.", false, "", false);
             }
         }
 
@@ -763,10 +781,8 @@
             const msgDiv = document.createElement('div');
             msgDiv.className = 'message ai-message';
             msgDiv.innerHTML = `
-                <div class="thinking-container">
-                    <div class="thinking-dot"></div>
-                    <div class="thinking-dot"></div>
-                    <div class="thinking-dot"></div>
+                <div class="quantum-loader-bar">
+                    <div class="quantum-loader-progress"></div>
                 </div>`;
             wrapper.appendChild(msgDiv);
             chatArea.appendChild(wrapper);
@@ -779,33 +795,53 @@
             if (loader) loader.remove();
         }
 
-        function renderMessage(text, isUser, modelInfo = "") {
+        function renderMessage(text, isUser, modelInfo = "", animate = false) {
             const chatArea = document.getElementById('chat-area');
             const wrapper = document.createElement('div');
             wrapper.className = `message-wrapper ${isUser ? 'user-wrapper' : 'ai-wrapper'}`;
             const msgDiv = document.createElement('div');
             msgDiv.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
-            
-            if (isUser) {
-                msgDiv.innerText = text;
-            } else {
-                msgDiv.innerHTML = marked.parse(text);
-            }
             wrapper.appendChild(msgDiv);
 
-
+            let metaStamp = null;
             if (!isUser && modelInfo) {
-                const meta = document.createElement('div');
-                meta.className = 'meta-stamp';
-                meta.innerText = modelInfo;
-                wrapper.appendChild(meta);
+                metaStamp = document.createElement('div');
+                metaStamp.className = 'meta-stamp';
+                metaStamp.innerText = modelInfo;
+                metaStamp.style.opacity = animate ? '0' : '1';
+                wrapper.appendChild(metaStamp);
             }
 
-
             chatArea.appendChild(wrapper);
-            chatArea.scrollTop = chatArea.scrollHeight;
-        }
 
+            if (isUser) {
+                msgDiv.innerText = text;
+                chatArea.scrollTop = chatArea.scrollHeight;
+            } else if (animate) {
+                // Typewriter matrix sequence builder
+                isTypingActive = true;
+                let index = 0;
+                let currentText = "";
+                const speed = 14; // Controls typing speed variance intervals (ms)
+
+                function type() {
+                    if (index < text.length) {
+                        currentText += text.charAt(index);
+                        msgDiv.innerHTML = marked.parse(currentText);
+                        index++;
+                        chatArea.scrollTop = chatArea.scrollHeight;
+                        setTimeout(type, speed);
+                    } else {
+                        isTypingActive = false;
+                        if (metaStamp) metaStamp.style.opacity = '1';
+                    }
+                }
+                type();
+            } else {
+                msgDiv.innerHTML = marked.parse(text);
+                chatArea.scrollTop = chatArea.scrollHeight;
+            }
+        }
 
         window.onload = () => {
             loadSidebarHistory();
