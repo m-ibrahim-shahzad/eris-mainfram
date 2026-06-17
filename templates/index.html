@@ -21,6 +21,56 @@
             overflow: hidden;
         }
         
+        /* Mini Persistent Shortcut Strip - visible when sidebar is collapsed */
+        .collapsed-mini-strip {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 60px;
+            height: 100%;
+            background-color: #111217;
+            border-right: 1px solid #1f2026;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            padding: 16px 0;
+            z-index: 55;
+            gap: 16px;
+        }
+        .mini-strip-btn {
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .mini-strip-btn:hover {
+            background: #1f2026;
+            color: #f1f5f9;
+        }
+        .mini-strip-btn svg {
+            width: 20px;
+            height: 20px;
+            stroke: currentColor;
+            fill: none;
+        }
+        .mini-strip-profile {
+            margin-top: auto;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+        }
+        
+        body.sidebar-collapsed .collapsed-mini-strip {
+            display: flex;
+        }
+
         /* Sidebar Layout Container with Collapsible Width Engine */
         .sidebar {
             width: 280px;
@@ -43,6 +93,7 @@
             min-width: 0;
             padding: 24px 0 16px 0;
             border-right: 1px solid transparent;
+            transform: translateX(-100%);
         }
 
         .sidebar-inner-wrapper {
@@ -62,7 +113,7 @@
             width: 100%;
         }
         
-        /* Minimalist Action Buttons (No borders/backgrounds by default) */
+        /* Minimalist Action Buttons */
         .action-item-btn {
             background: transparent;
             color: #c5cbd3;
@@ -119,7 +170,7 @@
             transition: all 0.2s ease;
         }
         .sidebar-search-input:focus {
-            border-color: #a855f7; /* Swapped to Purple */
+            border-color: #a855f7;
             background: #14161d;
         }
         .sidebar-search-input::placeholder {
@@ -154,32 +205,6 @@
         .desktop-toggle-btn:hover {
             background: #1f2026;
             color: #f1f5f9;
-        }
-
-        /* Float appearance configuration when hidden */
-        .floating-open-btn {
-            position: absolute;
-            top: 14px;
-            left: 16px;
-            z-index: 40;
-            background: #111217;
-            border: 1px solid #1f2026;
-            color: #94a3b8;
-            width: 42px;
-            height: 42px;
-            border-radius: 12px;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .floating-open-btn:hover {
-            background: #1f2026;
-            color: #f1f5f9;
-        }
-        body.sidebar-collapsed .floating-open-btn {
-            display: flex;
         }
         
         /* Interactive Recents Segment Bar Header */
@@ -315,7 +340,7 @@
             background: rgba(239, 68, 68, 0.1);
         }
 
-        /* Sidebar bottom profile trigger deck design mappings */
+        /* Sidebar bottom profile structure rules */
         .account-profile-trigger {
             display: flex;
             align-items: center;
@@ -341,6 +366,16 @@
             background: #2d3139;
             object-fit: cover;
             border: 1px solid #2d3139;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .profile-avatar.guest-avatar svg {
+            width: 20px;
+            height: 20px;
+            fill: none;
+            stroke: #ffffff;
+            stroke-width: 2;
         }
         .profile-info {
             flex: 1;
@@ -355,7 +390,7 @@
             text-overflow: ellipsis;
         }
 
-        /* Account Context Dropdown Panel structure rules */
+        /* Account Context Dropdown Panel */
         .account-popup-menu {
             position: absolute;
             bottom: 74px;
@@ -374,6 +409,15 @@
         .account-popup-menu.active {
             display: block;
         }
+        
+        /* Mini Strip Dropdown positioning override */
+        .account-popup-menu.mini-strip-active {
+            bottom: 16px;
+            left: 68px;
+            width: 220px;
+            right: auto;
+        }
+        
         @keyframes menuPopUp {
             from { transform: translateY(8px) scale(0.97); opacity: 0; }
             to { transform: translateY(0) scale(1); opacity: 1; }
@@ -413,7 +457,7 @@
         }
         
         body.sidebar-collapsed .top-bar {
-            padding-left: 72px; 
+            padding-left: 76px; 
         }
 
         .top-bar {
@@ -443,9 +487,31 @@
             display: inline-block;
             width: 8px;
             height: 8px;
-            background: #a855f7; /* Swapped to Purple */
+            background: #a855f7;
             border-radius: 50%;
-            box-shadow: 0 0 10px #a855f7; /* Swapped to Purple */
+            box-shadow: 0 0 10px #a855f7;
+        }
+        
+        /* Direct Layout Override for Header Sidebar View Controls */
+        .top-bar .header-toggle-btn {
+            background: transparent;
+            border: none;
+            color: #64748b;
+            width: 38px;
+            height: 38px;
+            border-radius: 8px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .top-bar .header-toggle-btn:hover {
+            background: #1f2026;
+            color: #f1f5f9;
+        }
+        body.sidebar-collapsed .top-bar .header-toggle-btn {
+            display: flex;
         }
 
         /* Messaging Render Area viewport bounds */
@@ -487,18 +553,18 @@
         .meta-stamp {
             font-size: 0.7rem;
             font-weight: 600;
-            color: #a855f7; /* Swapped to Purple */
+            color: #a855f7;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             margin-top: 6px;
             padding: 2px 8px;
-            background: rgba(168, 85, 247, 0.1); /* Swapped to Purple */
+            background: rgba(168, 85, 247, 0.1);
             border-radius: 4px;
             display: inline-block;
             width: fit-content;
         }
 
-        /* Cyberpunk Neon Pulse Loading Bar indicator rules */
+        /* Cyberpunk Neon Pulse Loading Bar */
         .quantum-loader-bar {
             width: 140px;
             height: 4px;
@@ -511,8 +577,8 @@
         .quantum-loader-progress {
             width: 40%;
             height: 100%;
-            background: linear-gradient(90deg, #a855f7, #c084fc); /* Swapped to Purple */
-            box-shadow: 0 0 8px #a855f7; /* Swapped to Purple */
+            background: linear-gradient(90deg, #a855f7, #c084fc);
+            box-shadow: 0 0 8px #a855f7;
             border-radius: 4px;
             position: absolute;
             left: -40%;
@@ -527,8 +593,9 @@
         .interactive-deck-wrapper {
             display: flex;
             flex-direction: column;
+            align-items: center;
             width: 100%;
-            padding: 24px 18% 36px 18%;
+            padding: 24px 40px 36px 40px;
             background: linear-gradient(180deg, transparent 0%, #0b0c10 50%);
             z-index: 10;
             position: relative;
@@ -539,7 +606,7 @@
         .welcome-hero {
             text-align: center;
             width: 100%;
-            margin-bottom: 24px;
+            margin-bottom: 32px;
             opacity: 1;
             z-index: 12;
             transition: all 0.3s ease;
@@ -560,27 +627,29 @@
         }
         .main-content.empty-chat .interactive-deck-wrapper {
             position: absolute;
-            top: 45%;
+            top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             background: transparent;
-            padding: 0 18%;
+            padding: 0 40px;
+            width: 100%;
         }
 
-        /* Gemini-style Purple spill dynamic backdrop glow */
+        /* Gemini-style Purple spill centered completely around the dynamic prompt layout box container */
         .main-content.empty-chat .interactive-deck-wrapper::before {
             content: '';
             position: absolute;
-            top: 60%;
+            top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%);
-            width: 650px;
-            height: 450px;
-            background: radial-gradient(circle, rgba(168, 85, 247, 0.12) 0%, rgba(168, 85, 247, 0.04) 45%, transparent 70%);
+            transform: translate(-50%, -15%);
+            width: 580px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(168, 85, 247, 0.16) 0%, rgba(168, 85, 247, 0.05) 45%, transparent 70%);
             z-index: 1;
             pointer-events: none;
         }
 
+        /* Gemini Compact Centered Focus Input Wrapper Layout rules */
         .input-box-wrapper {
             position: relative;
             display: flex;
@@ -591,11 +660,12 @@
             padding: 6px 10px 6px 24px;
             transition: all 0.2s ease;
             width: 100%;
+            max-width: 720px; /* Shortened to standard tidy layout bounds */
             z-index: 12;
         }
         .input-box-wrapper:focus-within {
-            border-color: #a855f7; /* Swapped to Purple */
-            box-shadow: 0 0 15px rgba(168, 85, 247, 0.25); /* Swapped to Purple */
+            border-color: #a855f7;
+            box-shadow: 0 0 15px rgba(168, 85, 247, 0.25);
             background: #14161d;
         }
         input[type="text"] {
@@ -610,7 +680,7 @@
         }
         input[type="text"]::placeholder { color: #4b5563; }
         .execute-btn {
-            background: #a855f7; /* Swapped to Purple */
+            background: #a855f7;
             color: #ffffff;
             border: none;
             width: 36px;
@@ -622,7 +692,7 @@
             cursor: pointer;
             transition: all 0.2s ease;
         }
-        .execute-btn:hover { background: #9333ea; transform: scale(1.05); } /* Swapped to Purple Hover */
+        .execute-btn:hover { background: #9333ea; transform: scale(1.05); }
         .execute-btn svg {
             width: 18px; height: 18px; fill: none; stroke: #ffffff;
             stroke-width: 3; stroke-linecap: round; stroke-linejoin: round;
@@ -641,6 +711,10 @@
                 display: block;
                 height: 100vh;
                 height: -webkit-fill-available;
+            }
+            
+            .collapsed-mini-strip {
+                display: none !important;
             }
 
             .sidebar {
@@ -667,10 +741,6 @@
                 width: 82vw;
                 min-width: 82vw !important;
                 padding: 18px 16px 16px 16px;
-            }
-
-            .floating-open-btn {
-                display: none !important;
             }
 
             .sidebar-inner-wrapper {
@@ -719,6 +789,9 @@
             .top-bar h2 {
                 font-size: 0.92rem;
             }
+            body.sidebar-collapsed .top-bar .header-toggle-btn {
+                display: none;
+            }
 
             .chat-area {
                 padding: 16px 14px;
@@ -745,6 +818,7 @@
 
             .input-box-wrapper {
                 padding: 4px 6px 4px 16px;
+                max-width: 100%;
             }
 
             input[type="text"] {
@@ -768,12 +842,36 @@
 </head>
 <body class="sidebar-collapsed">
 
-    <div class="floating-open-btn" onclick="toggleSidebarView()" title="Show Sidebar">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-            <line x1="9" y1="3" x2="9" y2="21"></line>
-            <polyline points="14 9 17 12 14 15"></polyline>
-        </svg>
+    <div class="collapsed-mini-strip">
+        <button class="mini-strip-btn" onclick="toggleSidebarView()" title="Expand Sidebar">
+            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="9" y1="3" x2="9" y2="21"></line>
+                <polyline points="14 9 11 12 14 15"></polyline>
+            </svg>
+        </button>
+        <button class="mini-strip-btn" onclick="startNewChat()" title="New Chat">
+            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+        </button>
+        <button class="mini-strip-btn" onclick="toggleSidebarView(); toggleSidebarSearch();" title="Search Chats">
+            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+        </button>
+        
+        {% if 'user_profile' in session %}
+        <div class="profile-avatar mini-strip-profile" onclick="toggleAccountMenu(event, true)">
+            <img class="profile-avatar" src="{{ session['user_profile'].get('picture', '') }}" alt="avatar" onerror="this.src='https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';">
+        </div>
+        {% else %}
+        <div class="profile-avatar guest-avatar mini-strip-profile" style="background: #2d3139;" onclick="toggleAccountMenu(event, true)">
+            <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+        </div>
+        {% endif %}
     </div>
 
     <div class="sidebar">
@@ -831,7 +929,7 @@
             </div>
 
             {% if 'user_profile' in session %}
-            <div class="account-profile-trigger" onclick="toggleAccountMenu(event)">
+            <div class="account-profile-trigger" onclick="toggleAccountMenu(event, false)">
                 <img class="profile-avatar" src="{{ session['user_profile'].get('picture', '') }}" alt="avatar" onerror="this.src='https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';">
                 <div class="profile-info">
                     <div class="profile-name">{{ session['user_profile'].get('name', 'Mainframe Pilot') }}</div>
@@ -839,13 +937,15 @@
                 <span style="color: #64748b; font-size: 0.8rem;">&#9652;</span>
             </div>
             {% else %}
-            <a href="/login" class="account-profile-trigger">
-                <div class="profile-avatar" style="display: flex; align-items: center; justify-content: center; color: #64748b; font-size: 1.1rem;">&#128100;</div>
+            <div class="account-profile-trigger" onclick="toggleAccountMenu(event, false)">
+                <div class="profile-avatar guest-avatar" style="background: #2d3139;">
+                    <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                </div>
                 <div class="profile-info">
                     <div class="profile-name">Guest Terminal</div>
                 </div>
-                <span style="color: #a855f7; font-size: 0.85rem; font-weight: 600;">Login</span>
-            </a>
+                <a href="/login" style="color: #a855f7; font-size: 0.85rem; font-weight: 600; text-decoration: none; margin-left: auto;">Login</a>
+            </div>
             {% endif %}
         </div>
     </div>
@@ -854,6 +954,13 @@
     <div id="main-content-frame" class="main-content empty-chat">
         <div class="top-bar">
             <button class="sidebar-toggle-btn" onclick="toggleSidebar()">☰</button>
+            <button class="header-toggle-btn" onclick="toggleSidebarView()" title="Show Sidebar">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="9" y1="3" x2="9" y2="21"></line>
+                    <polyline points="11 9 14 12 11 15"></polyline>
+                </svg>
+            </button>
             <h2>ERIS MAINFRAME</h2>
         </div>
         
@@ -906,9 +1013,16 @@
             list.classList.toggle('hidden-pane');
         }
 
-        function toggleAccountMenu(e) {
+        function toggleAccountMenu(e, fromMiniStrip = false) {
             e.stopPropagation();
             const menu = document.getElementById('account-popup-menu');
+            
+            if (fromMiniStrip) {
+                menu.classList.add('mini-strip-active');
+            } else {
+                menu.classList.remove('mini-strip-active');
+            }
+            
             menu.classList.toggle('active');
         }
 
