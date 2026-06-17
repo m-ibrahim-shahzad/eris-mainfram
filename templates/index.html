@@ -34,6 +34,7 @@
             transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), width 0.25s cubic-bezier(0.16, 1, 0.3, 1), min-width 0.25s cubic-bezier(0.16, 1, 0.3, 1), padding 0.25s cubic-bezier(0.16, 1, 0.3, 1);
             position: relative;
             overflow: hidden;
+            z-index: 60;
         }
         
         /* Desktop Sidebar Collapse State */
@@ -44,12 +45,11 @@
             border-right: 1px solid transparent;
         }
 
-        /* Elements inside sidebar get a minor wrapper to prevent structural text squeezing during crunch animations */
         .sidebar-inner-wrapper {
             display: flex;
             flex-direction: column;
             height: 100%;
-            width: 248px; /* Fixed matching width minus internal paddings */
+            width: 248px;
             flex-shrink: 0;
         }
 
@@ -80,7 +80,7 @@
             box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
         }
 
-        /* NEW: Beautiful Sidebar Toggle Layout (ChatGPT Style Layout Framework) */
+        /* Sidebar Toggle Layout Buttons */
         .desktop-toggle-btn {
             background: transparent;
             border: 1px solid #1f2026;
@@ -342,7 +342,7 @@
             padding-top: 14px;
         }
 
-        /* Main Center Processing Canvas Workspace Frame */
+        /* Main Canvas Setup Layout Engine */
         .main-content {
             flex: 1;
             display: flex;
@@ -351,10 +351,8 @@
             position: relative;
             height: 100%;
             overflow: hidden;
-            transition: padding-left 0.25s ease;
         }
         
-        /* Creates an elegant alignment shift when floating trigger is rendered */
         body.sidebar-collapsed .top-bar {
             padding-left: 72px; 
         }
@@ -391,25 +389,6 @@
             box-shadow: 0 0 10px #3b82f6;
         }
 
-        /* Centralized Main Greeting Hero Display Panel */
-        .welcome-hero {
-            position: absolute;
-            top: 42%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            width: 100%;
-            padding: 0 20px;
-            pointer-events: none;
-            z-index: 1;
-        }
-        .welcome-hero h1 {
-            font-size: 2.2rem;
-            font-weight: 600;
-            color: #ffffff;
-            letter-spacing: -0.5px;
-        }
-
         /* Messaging Render Area viewport bounds */
         .chat-area {
             flex: 1;
@@ -439,7 +418,6 @@
         .ai-wrapper { align-items: flex-start; }
         .ai-message { background-color: #111217; color: #e2e8f0; border-bottom-left-radius: 4px; border: 1px solid #1f2026; }
         
-        /* Code Block & Markdown Rendering Properties Layout fixes */
         .ai-message pre { background: #0b0c10; padding: 14px; border-radius: 8px; overflow-x: auto; margin: 12px 0; border: 1px solid #1f2026; }
         .ai-message code { font-family: 'Courier New', Courier, monospace; font-size: 0.9rem; background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 4px; }
         .ai-message pre code { background: transparent; padding: 0; }
@@ -486,12 +464,48 @@
             100% { left: 100%; }
         }
 
-        /* Input Deck Frame Layout Container Constraints */
-        .input-container {
+        /* NEW: Centralized Dynamic Flow Interface Architecture (Gemini Engine Replica Layout) */
+        .interactive-deck-wrapper {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
             padding: 24px 18% 36px 18%;
             background: linear-gradient(180deg, transparent 0%, #0b0c10 50%);
             z-index: 10;
+            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
         }
+
+        /* Centralized Main Greeting Hero Display Panel */
+        .welcome-hero {
+            text-align: center;
+            width: 100%;
+            margin-bottom: 24px;
+            opacity: 1;
+            transition: all 0.3s ease;
+        }
+        .welcome-hero h1 {
+            font-size: 2.4rem;
+            font-weight: 600;
+            color: #ffffff;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #ffffff 30%, #64748b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* System Rule Engine mapping variables when no dialogue exists */
+        .main-content.empty-chat .chat-area {
+            display: none;
+        }
+        .main-content.empty-chat .interactive-deck-wrapper {
+            position: absolute;
+            top: 45%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: transparent;
+            padding: 0 18%;
+        }
+
         .input-box-wrapper {
             position: relative;
             display: flex;
@@ -501,6 +515,7 @@
             border-radius: 28px;
             padding: 6px 10px 6px 24px;
             transition: all 0.2s ease;
+            width: 100%;
         }
         .input-box-wrapper:focus-within {
             border-color: #3b82f6;
@@ -556,7 +571,7 @@
                 position: fixed;
                 top: 0;
                 left: 0;
-                z-index: 50;
+                z-index: 70;
                 height: 100vh;
                 height: -webkit-fill-available;
                 width: 82vw;
@@ -633,13 +648,19 @@
                 padding: 16px 14px;
             }
 
-            .message {
-                max-width: 94%;
+            /* Gemini positioning layout parameters for mobile viewports */
+            .main-content.empty-chat .interactive-deck-wrapper {
+                padding: 0 20px;
+                width: 100%;
             }
 
-            .input-container {
+            .interactive-deck-wrapper {
                 padding: 10px 12px calc(16px + env(safe-area-inset-bottom));
                 background: #0b0c10;
+            }
+
+            .message {
+                max-width: 94%;
             }
 
             .input-box-wrapper {
@@ -652,7 +673,7 @@
             }
 
             .welcome-hero h1 {
-                font-size: 1.5rem;
+                font-size: 1.8rem;
             }
 
             .new-chat-btn {
@@ -730,19 +751,18 @@
     </div>
 
 
-    <div class="main-content">
+    <div id="main-content-frame" class="main-content empty-chat">
         <div class="top-bar">
             <button class="sidebar-toggle-btn" onclick="toggleSidebar()">☰</button>
             <h2>ERIS MAINFRAME</h2>
         </div>
         
-        <div id="welcome-hero" class="welcome-hero">
-            <h1>What's on your mind?</h1>
-        </div>
-        
         <div id="chat-area" class="chat-area"></div>
         
-        <div class="input-container">
+        <div class="interactive-deck-wrapper">
+            <div id="welcome-hero" class="welcome-hero">
+                <h1>What's on your mind?</h1>
+            </div>
             <div class="input-box-wrapper">
                 <input type="text" id="user-input" placeholder="Ask Eris anything..." onkeypress="handleKeyPress(event)">
                 <button class="execute-btn" onclick="sendPrompt()">
@@ -760,23 +780,23 @@
         let currentSessionId = "";
         let isTypingActive = false;
 
-        // Mobile responsive side drawer action toggle
         function toggleSidebar() {
             document.body.classList.toggle('sidebar-open');
         }
 
-        // NEW: Handles desktop widescreen sidebar hide/collapse modes
         function toggleSidebarView() {
             document.body.classList.toggle('sidebar-collapsed');
         }
 
+        // NEW: Manages dynamic layout styling based on live active content nodes
         function checkHeroVisibility() {
-            const hero = document.getElementById('welcome-hero');
+            const frame = document.getElementById('main-content-frame');
             const chatArea = document.getElementById('chat-area');
+            
             if (chatArea.children.length > 0) {
-                hero.style.display = 'none';
+                frame.classList.remove('empty-chat');
             } else {
-                hero.style.display = 'block';
+                frame.classList.add('empty-chat');
             }
         }
 
@@ -925,7 +945,9 @@
             const prompt = inputEl.value.trim();
             if (!prompt) return;
 
-            document.getElementById('welcome-hero').style.display = 'none';
+            // Instantly transition out of empty centered mode as soon as transmission begins
+            document.getElementById('main-content-frame').classList.remove('empty-chat');
+            
             renderMessage(prompt, true, "", false);
             inputEl.value = '';
 
