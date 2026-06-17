@@ -119,7 +119,7 @@
             transition: all 0.2s ease;
         }
         .sidebar-search-input:focus {
-            border-color: #3b82f6;
+            border-color: #a855f7; /* Swapped to Purple */
             background: #14161d;
         }
         .sidebar-search-input::placeholder {
@@ -443,9 +443,9 @@
             display: inline-block;
             width: 8px;
             height: 8px;
-            background: #3b82f6;
+            background: #a855f7; /* Swapped to Purple */
             border-radius: 50%;
-            box-shadow: 0 0 10px #3b82f6;
+            box-shadow: 0 0 10px #a855f7; /* Swapped to Purple */
         }
 
         /* Messaging Render Area viewport bounds */
@@ -487,12 +487,12 @@
         .meta-stamp {
             font-size: 0.7rem;
             font-weight: 600;
-            color: #3b82f6;
+            color: #a855f7; /* Swapped to Purple */
             text-transform: uppercase;
             letter-spacing: 0.5px;
             margin-top: 6px;
             padding: 2px 8px;
-            background: rgba(59, 130, 246, 0.1);
+            background: rgba(168, 85, 247, 0.1); /* Swapped to Purple */
             border-radius: 4px;
             display: inline-block;
             width: fit-content;
@@ -511,8 +511,8 @@
         .quantum-loader-progress {
             width: 40%;
             height: 100%;
-            background: linear-gradient(90deg, #3b82f6, #60a5fa);
-            box-shadow: 0 0 8px #3b82f6;
+            background: linear-gradient(90deg, #a855f7, #c084fc); /* Swapped to Purple */
+            box-shadow: 0 0 8px #a855f7; /* Swapped to Purple */
             border-radius: 4px;
             position: absolute;
             left: -40%;
@@ -523,7 +523,7 @@
             100% { left: 100%; }
         }
 
-        /* Centralized Dynamic Flow Interface Architecture (Gemini Engine Replica Layout) */
+        /* Centralized Dynamic Flow Interface Architecture */
         .interactive-deck-wrapper {
             display: flex;
             flex-direction: column;
@@ -531,6 +531,7 @@
             padding: 24px 18% 36px 18%;
             background: linear-gradient(180deg, transparent 0%, #0b0c10 50%);
             z-index: 10;
+            position: relative;
             transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
         }
 
@@ -540,6 +541,7 @@
             width: 100%;
             margin-bottom: 24px;
             opacity: 1;
+            z-index: 12;
             transition: all 0.3s ease;
         }
         .welcome-hero h1 {
@@ -565,6 +567,20 @@
             padding: 0 18%;
         }
 
+        /* Gemini-style Purple spill dynamic backdrop glow */
+        .main-content.empty-chat .interactive-deck-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 60%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 650px;
+            height: 450px;
+            background: radial-gradient(circle, rgba(168, 85, 247, 0.12) 0%, rgba(168, 85, 247, 0.04) 45%, transparent 70%);
+            z-index: 1;
+            pointer-events: none;
+        }
+
         .input-box-wrapper {
             position: relative;
             display: flex;
@@ -575,10 +591,11 @@
             padding: 6px 10px 6px 24px;
             transition: all 0.2s ease;
             width: 100%;
+            z-index: 12;
         }
         .input-box-wrapper:focus-within {
-            border-color: #3b82f6;
-            box-shadow: 0 0 15px rgba(59, 130, 246, 0.25);
+            border-color: #a855f7; /* Swapped to Purple */
+            box-shadow: 0 0 15px rgba(168, 85, 247, 0.25); /* Swapped to Purple */
             background: #14161d;
         }
         input[type="text"] {
@@ -593,7 +610,7 @@
         }
         input[type="text"]::placeholder { color: #4b5563; }
         .execute-btn {
-            background: #3b82f6;
+            background: #a855f7; /* Swapped to Purple */
             color: #ffffff;
             border: none;
             width: 36px;
@@ -605,7 +622,7 @@
             cursor: pointer;
             transition: all 0.2s ease;
         }
-        .execute-btn:hover { background: #2563eb; transform: scale(1.05); }
+        .execute-btn:hover { background: #9333ea; transform: scale(1.05); } /* Swapped to Purple Hover */
         .execute-btn svg {
             width: 18px; height: 18px; fill: none; stroke: #ffffff;
             stroke-width: 3; stroke-linecap: round; stroke-linejoin: round;
@@ -710,6 +727,11 @@
             .main-content.empty-chat .interactive-deck-wrapper {
                 padding: 0 20px;
                 width: 100%;
+            }
+
+            .main-content.empty-chat .interactive-deck-wrapper::before {
+                width: 100%;
+                height: 300px;
             }
 
             .interactive-deck-wrapper {
@@ -822,7 +844,7 @@
                 <div class="profile-info">
                     <div class="profile-name">Guest Terminal</div>
                 </div>
-                <span style="color: #3b82f6; font-size: 0.85rem; font-weight: 600;">Login</span>
+                <span style="color: #a855f7; font-size: 0.85rem; font-weight: 600;">Login</span>
             </a>
             {% endif %}
         </div>
