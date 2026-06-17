@@ -29,9 +29,10 @@
             border-right: 1px solid #1f2026;
             display: flex;
             flex-direction: column;
-            padding: 24px 16px;
+            padding: 24px 16px 16px 16px;
             height: 100%;
             transition: transform 0.25s ease;
+            position: relative;
         }
         
         .new-chat-btn {
@@ -182,23 +183,90 @@
             background: rgba(239, 68, 68, 0.1);
         }
 
-        .clear-history-btn {
+        /* NEW: Sidebar bottom profile trigger deck design mappings */
+        .account-profile-trigger {
+            display: flex;
+            align-items: center;
+            gap: 12px;
             padding: 12px;
             background: transparent;
-            color: #64748b;
-            border: 1px dashed #2d3139;
-            border-radius: 8px;
-            text-align: center;
-            font-size: 0.85rem;
+            border-radius: 12px;
             cursor: pointer;
-            transition: all 0.2s;
             user-select: none;
-            width: 100%;
+            transition: background 0.2s ease;
+            margin-top: auto;
+            border: 1px solid transparent;
+            text-decoration: none;
+            color: inherit;
         }
-        .clear-history-btn:hover {
-            background: rgba(239, 68, 68, 0.05);
-            color: #ef4444;
-            border-color: rgba(239, 68, 68, 0.2);
+        .account-profile-trigger:hover {
+            background: #1f2026;
+        }
+        .profile-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #2d3139;
+            object-fit: cover;
+            border: 1px solid #2d3139;
+        }
+        .profile-info {
+            flex: 1;
+            overflow: hidden;
+        }
+        .profile-name {
+            font-size: 0.92rem;
+            font-weight: 500;
+            color: #f1f5f9;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* NEW: Account Context Dropdown Panel structure rules */
+        .account-popup-menu {
+            position: absolute;
+            bottom: 74px;
+            left: 16px;
+            right: 16px;
+            background: #181920;
+            border: 1px solid #2d3139;
+            border-radius: 12px;
+            padding: 6px;
+            box-shadow: 0 -10px 25px rgba(0,0,0,0.5);
+            z-index: 110;
+            display: none;
+            transform-origin: bottom center;
+            animation: menuPopUp 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .account-popup-menu.active {
+            display: block;
+        }
+        @keyframes menuPopUp {
+            from { transform: translateY(8px) scale(0.97); opacity: 0; }
+            to { transform: translateY(0) scale(1); opacity: 1; }
+        }
+        .account-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            font-size: 0.9rem;
+            color: #94a3b8;
+            cursor: pointer;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.15s;
+        }
+        .account-menu-item:hover {
+            background: #22242d;
+            color: #f1f5f9;
+        }
+        .account-menu-item.item-logout {
+            border-top: 1px solid #2d3139;
+            border-radius: 0 0 8px 8px;
+            margin-top: 4px;
+            padding-top: 14px;
         }
 
         /* Main Center Processing Canvas Workspace Frame */
@@ -216,7 +284,6 @@
             min-height: 70px;
             border-bottom: 1px solid #1f2026;
             display: flex;
-            justify-content: space-between;
             align-items: center;
             padding: 0 40px;
             background-color: #111217;
@@ -241,31 +308,6 @@
             background: #3b82f6;
             border-radius: 50%;
             box-shadow: 0 0 10px #3b82f6;
-        }
-        .auth-toggle-btn {
-            background: transparent;
-            border: 1px solid #2d3139;
-            padding: 8px 16px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-size: 0.85rem;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-        .auth-toggle-btn.btn-login {
-            border-color: #3b82f6;
-            color: #3b82f6;
-        }
-        .auth-toggle-btn.btn-login:hover {
-            background: rgba(59, 130, 246, 0.1);
-        }
-        .auth-toggle-btn.btn-logout {
-            color: #94a3b8;
-        }
-        .auth-toggle-btn.btn-logout:hover {
-            background: rgba(239, 68, 68, 0.1);
-            color: #ef4444;
-            border-color: rgba(239, 68, 68, 0.2);
         }
 
         /* Centralized Main Greeting Hero Display Panel */
@@ -338,7 +380,7 @@
             width: fit-content;
         }
 
-        /* NEW Cyberpunk Neon Pulse Loading Bar indicator rules (replaces boring dots) */
+        /* Cyberpunk Neon Pulse Loading Bar indicator rules */
         .quantum-loader-bar {
             width: 140px;
             height: 4px;
@@ -510,8 +552,7 @@
                 font-size: 1.5rem;
             }
 
-            .new-chat-btn,
-            .clear-history-btn {
+            .new-chat-btn {
                 font-size: 0.9rem;
             }
 
@@ -522,7 +563,6 @@
     </style>
 </head>
 <body>
-
 
     <div class="sidebar">
         <div class="new-chat-btn" onclick="startNewChat()">New Chat</div>
@@ -535,7 +575,35 @@
         </div>
         
         <div id="history-list" class="history-list"></div>
-        <button class="clear-history-btn" onclick="clearAllChats()">Clear Chats</button>
+
+        <div class="account-popup-menu" id="account-popup-menu">
+            <a href="/login" class="account-menu-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+                Add Account
+            </a>
+            <a href="/logout" class="account-menu-item item-logout" style="color: #ef4444;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                Log Out
+            </a>
+        </div>
+
+        {% if 'user_profile' in session %}
+        <div class="account-profile-trigger" onclick="toggleAccountMenu(event)">
+            <img class="profile-avatar" src="{{ session['user_profile'].get('picture', '') }}" alt="avatar" onerror="this.src='https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';">
+            <div class="profile-info">
+                <div class="profile-name">{{ session['user_profile'].get('name', 'Mainframe Pilot') }}</div>
+            </div>
+            <span style="color: #64748b; font-size: 0.8rem;">&#9652;</span>
+        </div>
+        {% else %}
+        <a href="/login" class="account-profile-trigger">
+            <div class="profile-avatar" style="display: flex; align-items: center; justify-content: center; color: #64748b; font-size: 1.1rem;">&#128100;</div>
+            <div class="profile-info">
+                <div class="profile-name">Guest Terminal</div>
+            </div>
+            <span style="color: #3b82f6; font-size: 0.85rem; font-weight: 600;">Login</span>
+        </a>
+        {% endif %}
     </div>
 
 
@@ -543,11 +611,6 @@
         <div class="top-bar">
             <button class="sidebar-toggle-btn" onclick="toggleSidebar()">☰</button>
             <h2>ERIS MAINFRAME</h2>
-            {% if 'user_profile' in session %}
-                <a href="/logout" class="auth-toggle-btn btn-logout">Logout</a>
-            {% else %}
-                <a href="/login" class="auth-toggle-btn btn-login">Login</a>
-            {% endif %}
         </div>
         
         <div id="welcome-hero" class="welcome-hero">
@@ -572,7 +635,7 @@
 
     <script>
         let currentSessionId = "";
-        let isTypingActive = false; // Prevents overlapping concurrent print renders
+        let isTypingActive = false;
 
         function toggleSidebar() {
             document.body.classList.toggle('sidebar-open');
@@ -595,6 +658,13 @@
             list.classList.toggle('hidden-pane');
         }
 
+        /* NEW: Controls Account Sub menu slide deck toggling states */
+        function toggleAccountMenu(e) {
+            e.stopPropagation();
+            const menu = document.getElementById('account-popup-menu');
+            menu.classList.toggle('active');
+        }
+
         async function loadSidebarHistory() {
             try {
                 const response = await fetch('/api/history');
@@ -607,13 +677,11 @@
                         const container = document.createElement('div');
                         container.className = 'history-item-container';
 
-
                         const itemDiv = document.createElement('div');
                         itemDiv.className = 'history-item';
                         itemDiv.innerText = item.title;
                         itemDiv.onclick = () => selectSession(item.id);
                         container.appendChild(itemDiv);
-
 
                         const dotsBtn = document.createElement('button');
                         dotsBtn.className = 'item-options-trigger';
@@ -624,7 +692,6 @@
                         };
                         container.appendChild(dotsBtn);
 
-
                         const dropdown = document.createElement('div');
                         dropdown.className = 'options-dropdown';
                         dropdown.id = `dropdown-${item.id}`;
@@ -633,7 +700,6 @@
                             <div class="dropdown-opt opt-delete" onclick="deleteIndividualChat('${item.id}', event)">Delete</div>
                         `;
                         container.appendChild(dropdown);
-
 
                         listContainer.appendChild(container);
                     });
@@ -651,8 +717,11 @@
             if (menu) menu.classList.toggle('active');
         }
 
+        // Global dismiss interactions hook
         document.addEventListener('click', () => {
             document.querySelectorAll('.options-dropdown').forEach(el => el.classList.remove('active'));
+            const accMenu = document.getElementById('account-popup-menu');
+            if (accMenu) accMenu.classList.remove('active');
         });
 
         async function renameChatThread(sessionId, oldTitle, e) {
@@ -691,21 +760,8 @@
             }
         }
 
-        async function clearAllChats() {
-            if (!confirm("Are you sure you want to delete your entire chat history?")) return;
-            try {
-                const response = await fetch('/api/history/clear', { method: 'POST' });
-                if (response.ok) {
-                    startNewChat();
-                    loadSidebarHistory();
-                }
-            } catch (err) {
-                console.error("Failed to clear conversation storage indexes", err);
-            }
-        }
-
         async function selectSession(sessionId) {
-            if (isTypingActive) return; // Locks input during print streams
+            if (isTypingActive) return;
             currentSessionId = sessionId;
             try {
                 const response = await fetch(`/api/session/${sessionId}`);
@@ -760,7 +816,6 @@
                 if (response.ok) {
                     const result = await response.json();
                     currentSessionId = result.session_id;
-                    // Triggers the fluid simulated typewriter print sequence
                     renderMessage(result.response, false, result.model_used, true);
                     loadSidebarHistory();
                 } else {
@@ -818,11 +873,10 @@
                 msgDiv.innerText = text;
                 chatArea.scrollTop = chatArea.scrollHeight;
             } else if (animate) {
-                // Typewriter matrix sequence builder
                 isTypingActive = true;
                 let index = 0;
                 let currentText = "";
-                const speed = 14; // Controls typing speed variance intervals (ms)
+                const speed = 14;
 
                 function type() {
                     if (index < text.length) {
