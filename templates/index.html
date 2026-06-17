@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Eris AI Mainframe Terminal</title>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
@@ -374,6 +374,7 @@
             font-size: 0.98rem;
             outline: none;
             padding: 12px 0;
+            -webkit-appearance: none;
         }
         input[type="text"]::placeholder { color: #4b5563; }
         .execute-btn {
@@ -406,6 +407,8 @@
         @media (max-width: 768px) {
             body {
                 display: block;
+                height: 100vh;
+                height: -webkit-fill-available;
             }
 
             .sidebar {
@@ -414,6 +417,7 @@
                 left: 0;
                 z-index: 50;
                 height: 100vh;
+                height: -webkit-fill-available;
                 width: 82vw;
                 min-width: 82vw;
                 max-width: 320px;
@@ -430,6 +434,7 @@
             .main-content {
                 width: 100vw;
                 height: 100vh;
+                height: -webkit-fill-available;
             }
 
             .top-bar {
@@ -462,18 +467,26 @@
             }
 
             .chat-area {
-                padding: 18px 14px;
+                padding: 16px 14px;
             }
 
             .message {
                 max-width: 94%;
             }
 
+            /* Shifted prompt wrapper upward & appended dynamic environment safe padding rules */
             .input-container {
-                padding: 12px 12px calc(18px + env(safe-area-inset-bottom));
-                position: sticky;
-                bottom: 0;
-                background: linear-gradient(180deg, transparent 0%, #0b0c10 35%);
+                padding: 10px 12px calc(16px + env(safe-area-inset-bottom));
+                background: #0b0c10;
+            }
+
+            .input-box-wrapper {
+                padding: 4px 6px 4px 16px;
+            }
+
+            input[type="text"] {
+                padding: 10px 0;
+                font-size: 1rem; /* Prevents iOS auto-zoom shift faults */
             }
 
             .welcome-hero h1 {
@@ -776,7 +789,6 @@
             if (isUser) {
                 msgDiv.innerText = text;
             } else {
-                // Safely parsing AI response strings directly into beautiful rich Markdown components
                 msgDiv.innerHTML = marked.parse(text);
             }
             wrapper.appendChild(msgDiv);
