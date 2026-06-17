@@ -458,20 +458,6 @@
             border: none;
         }
 
-        /* FIXED RADIAL BACKGROUND: Anchored cleanly to the absolute top frame boundary */
-        .main-content.empty-chat::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 1000px;
-            height: 500px;
-            background: radial-gradient(circle at top center, rgba(168, 85, 247, 0.24) 0%, rgba(168, 85, 247, 0.06) 40%, transparent 70%);
-            z-index: 1;
-            pointer-events: none;
-        }
-
         /* Floating Clean Mobile Toggle Button */
         .floating-mobile-toggle {
             position: absolute;
@@ -610,14 +596,34 @@
         .main-content.empty-chat .chat-area {
             display: none;
         }
+        
+        /* PERFECTLY CENTERED PROMPT AND RADIAL SPILL */
         .main-content.empty-chat .interactive-deck-wrapper {
             position: absolute;
-            top: 55%;
+            top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             background: transparent;
             padding: 0 40px;
             width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* The radial glow is now locked behind the prompt and centers with it */
+        .main-content.empty-chat .interactive-deck-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 1000px;
+            height: 600px;
+            background: radial-gradient(circle at center, rgba(168, 85, 247, 0.16) 0%, rgba(168, 85, 247, 0.04) 45%, transparent 70%);
+            z-index: 1;
+            pointer-events: none;
         }
 
         .prompt-container-outer {
@@ -729,9 +735,9 @@
                 height: -webkit-fill-available;
             }
 
-            .main-content.empty-chat::before {
+            .main-content.empty-chat .interactive-deck-wrapper::before {
                 width: 100%;
-                height: 300px;
+                height: 400px;
             }
 
             .floating-mobile-toggle {
