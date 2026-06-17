@@ -170,7 +170,7 @@
             color: #f1f5f9;
         }
 
-        /* Clean Search Input Component (No internal magnifying glass) */
+        /* Adjusted Search Input (With 16px side padding for natural alignment) */
         .sidebar-search-wrapper {
             position: relative;
             width: 100%;
@@ -190,7 +190,7 @@
             background: #181920;
             border: 1px solid #1f2026;
             border-radius: 8px;
-            padding: 8px 12px;
+            padding: 8px 16px; /* Added internal gap to prevent pressing against the border */
             font-size: 0.85rem;
             color: #f1f5f9;
             outline: none;
@@ -200,7 +200,7 @@
             border-color: #a855f7;
             background: #14161d;
         }
-        /* Instantly hide placeholder text when the user starts typing */
+        /* Instantly hide placeholder text when user starts typing */
         .sidebar-search-input:not(:placeholder-shown)::placeholder {
             color: transparent;
         }
