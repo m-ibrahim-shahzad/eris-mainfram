@@ -20,6 +20,7 @@
             height: 100vh;
             width: 100vw;
             overflow: hidden;
+            position: relative;
         }
         
         /* Mini Persistent Shortcut Strip - visible when sidebar is collapsed */
@@ -605,16 +606,16 @@
             width: 100%;
         }
 
-        /* Large Expanded Radial Aura completely behind prompt box */
+        /* Fixed Full Overflow Radial Aura completely flushed to top window boundary */
         .main-content.empty-chat .prompt-container-outer::before {
             content: '';
             position: absolute;
-            top: 50%;
+            top: calc(-50vh + 100px);
             left: 50%;
-            transform: translate(-50%, -50%);
-            width: 750px;
-            height: 450px;
-            background: radial-gradient(circle, rgba(168, 85, 247, 0.25) 0%, rgba(168, 85, 247, 0.07) 50%, transparent 70%);
+            transform: translateX(-50%);
+            width: 850px;
+            height: 550px;
+            background: radial-gradient(circle at top center, rgba(168, 85, 247, 0.28) 0%, rgba(168, 85, 247, 0.08) 45%, transparent 70%);
             z-index: -1;
             pointer-events: none;
         }
@@ -744,6 +745,7 @@
             .main-content.empty-chat .prompt-container-outer::before {
                 width: 100%;
                 height: 260px;
+                top: -40px;
             }
 
             .interactive-deck-wrapper {
