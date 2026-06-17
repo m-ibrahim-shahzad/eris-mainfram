@@ -458,6 +458,20 @@
             border: none;
         }
 
+        /* FIXED RADIAL BACKGROUND: Anchored cleanly to the absolute top frame boundary */
+        .main-content.empty-chat::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 1000px;
+            height: 500px;
+            background: radial-gradient(circle at top center, rgba(168, 85, 247, 0.24) 0%, rgba(168, 85, 247, 0.06) 40%, transparent 70%);
+            z-index: 1;
+            pointer-events: none;
+        }
+
         /* Floating Clean Mobile Toggle Button */
         .floating-mobile-toggle {
             position: absolute;
@@ -598,26 +612,12 @@
         }
         .main-content.empty-chat .interactive-deck-wrapper {
             position: absolute;
-            top: 50%;
+            top: 55%;
             left: 50%;
             transform: translate(-50%, -50%);
             background: transparent;
             padding: 0 40px;
             width: 100%;
-        }
-
-        /* Fixed Full Overflow Radial Aura completely flushed to top window boundary */
-        .main-content.empty-chat .prompt-container-outer::before {
-            content: '';
-            position: absolute;
-            top: calc(-50vh + 100px);
-            left: 50%;
-            transform: translateX(-50%);
-            width: 850px;
-            height: 550px;
-            background: radial-gradient(circle at top center, rgba(168, 85, 247, 0.28) 0%, rgba(168, 85, 247, 0.08) 45%, transparent 70%);
-            z-index: -1;
-            pointer-events: none;
         }
 
         .prompt-container-outer {
@@ -729,6 +729,11 @@
                 height: -webkit-fill-available;
             }
 
+            .main-content.empty-chat::before {
+                width: 100%;
+                height: 300px;
+            }
+
             .floating-mobile-toggle {
                 display: inline-flex !important;
             }
@@ -740,12 +745,6 @@
             .main-content.empty-chat .interactive-deck-wrapper {
                 padding: 0 20px;
                 width: 100%;
-            }
-
-            .main-content.empty-chat .prompt-container-outer::before {
-                width: 100%;
-                height: 260px;
-                top: -40px;
             }
 
             .interactive-deck-wrapper {
@@ -934,7 +933,6 @@
                 document.body.classList.toggle('sidebar-collapsed');
                 document.body.classList.remove('sidebar-open');
             }
-            // Safely close the active popup state upon transition
             document.getElementById('account-popup-menu').classList.remove('active');
         }
 
