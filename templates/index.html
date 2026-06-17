@@ -61,7 +61,7 @@
             width: 100%;
         }
         
-        /* NEW: Minimalist ChatGPT-style New Chat button layout */
+        /* Minimalist ChatGPT-style New Chat button layout */
         .new-chat-btn {
             background: transparent;
             color: #f1f5f9;
@@ -89,7 +89,7 @@
             stroke: #94a3b8;
         }
 
-        /* NEW: Dedicated Search Chats Interface Component */
+        /* Dedicated Search Chats Interface Component */
         .sidebar-search-wrapper {
             position: relative;
             margin-bottom: 20px;
@@ -100,7 +100,7 @@
             background: #181920;
             border: 1px solid #1f2026;
             border-radius: 8px;
-            padding: 8px 12px 8px 34px;
+            padding: 8px 12px 8px 38px; /* Fixed: Increased left padding to completely prevent overlap */
             font-size: 0.85rem;
             color: #f1f5f9;
             outline: none;
@@ -115,7 +115,7 @@
         }
         .sidebar-search-icon {
             position: absolute;
-            left: 12px;
+            left: 14px; /* Fixed: Perfectly aligned icon placement */
             top: 50%;
             transform: translateY(-50%);
             width: 14px;
@@ -732,7 +732,7 @@
         }
     </style>
 </head>
-<body>
+<body class="sidebar-collapsed">
 
     <div class="floating-open-btn" onclick="toggleSidebarView()" title="Show Sidebar">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -872,7 +872,6 @@
             menu.classList.toggle('active');
         }
 
-        // NEW: Client-side real-time query list filter function
         function filterChatThreads() {
             const query = document.getElementById('sidebar-search').value.toLowerCase().trim();
             const items = document.querySelectorAll('.history-item-container');
@@ -926,7 +925,6 @@
                         listContainer.appendChild(container);
                     });
                     
-                    // Re-run filter in case an update drops while a query is active
                     filterChatThreads();
                 }
             } catch (err) {
@@ -1008,7 +1006,7 @@
             if (isTypingActive) return;
             currentSessionId = "";
             document.getElementById('chat-area').innerHTML = '';
-            document.getElementById('sidebar-search').value = ''; // Clear search on explicit reset
+            document.getElementById('sidebar-search').value = '';
             filterChatThreads();
             checkHeroVisibility();
             if (window.innerWidth <= 768) document.body.classList.remove('sidebar-open');
