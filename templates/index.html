@@ -10,6 +10,7 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            border: none;
         }
         body {
             background-color: #0b0c10;
@@ -39,7 +40,6 @@
         }
         .mini-strip-btn {
             background: transparent;
-            border: none;
             color: #94a3b8;
             width: 42px;
             height: 42px;
@@ -62,9 +62,17 @@
         }
         .mini-strip-profile {
             margin-top: auto;
-            width: 32px;
-            height: 32px;
+            width: 36px;
+            height: 36px;
             cursor: pointer;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.15s;
+        }
+        .mini-strip-profile:hover {
+            background: #1f2026;
         }
         
         body.sidebar-collapsed .collapsed-mini-strip {
@@ -87,7 +95,6 @@
             z-index: 60;
         }
         
-        /* Desktop Sidebar Collapse State */
         body.sidebar-collapsed .sidebar {
             width: 0;
             min-width: 0;
@@ -123,7 +130,6 @@
             font-size: 0.92rem;
             transition: all 0.15s ease;
             user-select: none;
-            border: none;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -190,7 +196,6 @@
         /* Sidebar Toggle Layout Buttons */
         .desktop-toggle-btn {
             background: transparent;
-            border: none;
             color: #64748b;
             width: 38px;
             height: 38px;
@@ -271,7 +276,6 @@
             overflow: hidden;
             text-overflow: ellipsis;
             transition: all 0.2s;
-            border: 1px solid transparent;
             width: 100%;
             text-align: left;
         }
@@ -287,7 +291,6 @@
             top: 50%;
             transform: translateY(-50%);
             background: transparent;
-            border: none;
             color: #64748b;
             cursor: pointer;
             font-size: 1.1rem;
@@ -351,7 +354,6 @@
             user-select: none;
             transition: background 0.2s ease;
             margin-top: auto;
-            border: 1px solid transparent;
             text-decoration: none;
             color: inherit;
         }
@@ -364,7 +366,6 @@
             border-radius: 50%;
             background: #2d3139;
             object-fit: cover;
-            border: 1px solid #2d3139;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -453,9 +454,10 @@
             position: relative;
             height: 100%;
             overflow: hidden;
+            border: none;
         }
 
-        /* Floating Clean Mobile Toggle Button (Visible only when Top Bar is gone) */
+        /* Floating Clean Mobile Toggle Button */
         .floating-mobile-toggle {
             position: absolute;
             top: 16px;
@@ -479,7 +481,7 @@
             color: #f1f5f9;
         }
         body:not(.sidebar-collapsed) .floating-mobile-toggle {
-            display: none !important; /* Hide toggle button if sidebar is fully opened */
+            display: none !important;
         }
 
         /* Messaging Render Area */
@@ -603,14 +605,14 @@
             width: 100%;
         }
 
-        /* Large Expanded Radial Aura centring entirely around prompt box wrapper */
+        /* Large Expanded Radial Aura completely behind prompt box */
         .main-content.empty-chat .prompt-container-outer::before {
             content: '';
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 750px; /* Expanded diameter to comfortably isolate prompt bar within boundaries */
+            width: 750px;
             height: 450px;
             background: radial-gradient(circle, rgba(168, 85, 247, 0.25) 0%, rgba(168, 85, 247, 0.07) 50%, transparent 70%);
             z-index: -1;
@@ -636,7 +638,7 @@
             padding: 6px 10px 6px 24px;
             transition: all 0.2s ease;
             width: 100%;
-            max-width: 500px; /* Shortened prompt length to fully sit inside the spill aura */
+            max-width: 500px;
         }
         .input-box-wrapper:focus-within {
             border-color: #a855f7;
@@ -646,7 +648,6 @@
         input[type="text"] {
             flex: 1;
             background: transparent;
-            border: none;
             color: #f1f5f9;
             font-size: 0.98rem;
             outline: none;
@@ -657,7 +658,6 @@
         .execute-btn {
             background: #a855f7;
             color: #ffffff;
-            border: none;
             width: 36px;
             height: 36px;
             border-radius: 50%;
@@ -802,15 +802,15 @@
             </svg>
         </button>
         
-        {% if 'user_profile' in session %}
-        <div class="profile-avatar mini-strip-profile" onclick="toggleAccountMenu(event, true)">
-            <img class="profile-avatar" src="{{ session['user_profile'].get('picture', '') }}" alt="avatar" onerror="this.src='https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';">
+        <div class="mini-strip-profile" onclick="toggleAccountMenu(event, true)" title="Account Options">
+            {% if 'user_profile' in session %}
+            <img class="profile-avatar" style="width: 32px; height: 32px;" src="{{ session['user_profile'].get('picture', '') }}" alt="avatar" onerror="this.src='https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';">
+            {% else %}
+            <div class="profile-avatar guest-avatar" style="width: 32px; height: 32px; background: #2d3139;">
+                <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            </div>
+            {% endif %}
         </div>
-        {% else %}
-        <div class="profile-avatar guest-avatar mini-strip-profile" style="background: #2d3139;" onclick="toggleAccountMenu(event, true)">
-            <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-        </div>
-        {% endif %}
     </div>
 
     <div class="sidebar">
@@ -932,6 +932,8 @@
                 document.body.classList.toggle('sidebar-collapsed');
                 document.body.classList.remove('sidebar-open');
             }
+            // Safely close the active popup state upon transition
+            document.getElementById('account-popup-menu').classList.remove('active');
         }
 
         function toggleSidebarView() {
