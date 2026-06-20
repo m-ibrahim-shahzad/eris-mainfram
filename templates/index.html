@@ -564,6 +564,8 @@
             align-items: center;
             justify-content: center;
             width: 100%;
+            max-width: 720px; /* Constrains desktop input bar length */
+            margin: 0 auto;   /* Centers bar alignment */
             padding: 24px 40px 48px 40px;
             background: linear-gradient(180deg, transparent 0%, #0b0c10 50%);
             z-index: 10;
@@ -603,8 +605,8 @@
         .main-content.empty-chat .interactive-deck-wrapper {
             background: transparent;
             padding: 0 24px;
-            width: 100vw;
-            max-width: 540px;
+            width: 100%;
+            max-width: 720px;
         }
 
         .main-content.empty-chat .interactive-deck-wrapper::before {
@@ -618,6 +620,15 @@
             background: radial-gradient(circle at center, rgba(168, 85, 247, 0.12) 0%, rgba(168, 85, 247, 0.03) 45%, transparent 70%);
             z-index: 1;
             pointer-events: none;
+        }
+
+        /* Active Chat Layout Modifiers */
+        .main-content:not(.empty-chat) .welcome-hero {
+            display: none !important; /* Forces welcome message text to vanish instantly on first prompt */
+        }
+        .main-content:not(.empty-chat) .interactive-deck-wrapper {
+            background: #0b0c10;
+            padding: 16px 24px 32px 24px;
         }
 
         .prompt-container-outer {
@@ -756,6 +767,7 @@
             .interactive-deck-wrapper {
                 padding: 10px 12px calc(16px + env(safe-area-inset-bottom));
                 background: #0b0c10;
+                max-width: 100%;
             }
 
             .message {
@@ -936,6 +948,7 @@
         let currentSessionId = "";
         let isTypingActive = false;
 
+        // Unified toggles
         function toggleUnifiedSidebar() {
             if (window.innerWidth <= 768) {
                 document.body.classList.toggle('sidebar-open');
