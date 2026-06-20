@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no, viewport-fit=cover">
     <title>Eris AI Mainframe Terminal</title>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
@@ -12,7 +12,7 @@
             padding: 0;
             border: none;
         }
-        body {
+        html, body {
             background-color: #0b0c10;
             color: #e2e8f0;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -170,7 +170,7 @@
             color: #f1f5f9;
         }
 
-        /* Adjusted Search Input (With 16px side padding for natural alignment) */
+        /* Search Input */
         .sidebar-search-wrapper {
             position: relative;
             width: 100%;
@@ -190,7 +190,7 @@
             background: #181920;
             border: 1px solid #1f2026;
             border-radius: 8px;
-            padding: 8px 16px; /* Added internal gap to prevent pressing against the border */
+            padding: 8px 16px;
             font-size: 0.85rem;
             color: #f1f5f9;
             outline: none;
@@ -200,7 +200,6 @@
             border-color: #a855f7;
             background: #14161d;
         }
-        /* Instantly hide placeholder text when user starts typing */
         .sidebar-search-input:not(:placeholder-shown)::placeholder {
             color: transparent;
         }
@@ -209,7 +208,7 @@
             transition: color 0.1s ease;
         }
 
-        /* Interactive Recents Segment Bar Header */
+        /* Interactive Recents Header */
         .recents-header {
             display: flex;
             justify-content: space-between;
@@ -255,7 +254,6 @@
             display: none;
         }
 
-        /* Hover Action Items Container */
         .history-item-container {
             position: relative;
             margin-bottom: 4px;
@@ -282,7 +280,6 @@
             color: #f1f5f9;
         }
         
-        /* Three Dots Option Trigger Button */
         .item-options-trigger {
             position: absolute;
             right: 12px;
@@ -306,7 +303,6 @@
             background: rgba(255, 255, 255, 0.05);
         }
 
-        /* Custom Options Context Dropdown Box */
         .options-dropdown {
             position: absolute;
             right: 12px;
@@ -340,7 +336,6 @@
             background: rgba(239, 68, 68, 0.1);
         }
 
-        /* Sidebar bottom profile structure rules */
         .account-profile-trigger {
             display: flex;
             align-items: center;
@@ -388,7 +383,6 @@
             text-overflow: ellipsis;
         }
 
-        /* Account Context Dropdown Panel */
         .account-popup-menu {
             position: absolute;
             bottom: 74px;
@@ -408,7 +402,6 @@
             display: block;
         }
         
-        /* Mini Strip Dropdown positioning override */
         .account-popup-menu.mini-strip-active {
             position: absolute;
             bottom: 16px;
@@ -449,7 +442,7 @@
             padding-top: 14px;
         }
 
-        /* Main Canvas Setup Layout Engine */
+        /* Main Canvas Layout Engine */
         .main-content {
             flex: 1;
             display: flex;
@@ -457,6 +450,7 @@
             background-color: #0b0c10;
             position: relative;
             height: 100%;
+            width: 100%;
             overflow: hidden;
             border: none;
         }
@@ -563,11 +557,12 @@
             100% { left: 100%; }
         }
 
-        /* Centralized Flow Interface */
+        /* Input Container Interface Wrapper */
         .interactive-deck-wrapper {
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
             width: 100%;
             padding: 24px 40px 48px 40px;
             background: linear-gradient(180deg, transparent 0%, #0b0c10 50%);
@@ -595,24 +590,21 @@
             -webkit-text-fill-color: transparent;
         }
 
-        /* System states when no dialogue exists */
+        /* Fixed Centering System via Display Grid block layout */
+        .main-content.empty-chat {
+            display: grid;
+            place-items: center;
+            align-content: center;
+        }
         .main-content.empty-chat .chat-area {
             display: none;
         }
         
-        /* PERFECTLY CENTERED PROMPT AND RADIAL SPILL */
         .main-content.empty-chat .interactive-deck-wrapper {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
             background: transparent;
-            padding: 0 40px;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            padding: 0 24px;
+            width: 100vw;
+            max-width: 540px;
         }
 
         .main-content.empty-chat .interactive-deck-wrapper::before {
@@ -621,9 +613,9 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 1000px;
-            height: 600px;
-            background: radial-gradient(circle at center, rgba(168, 85, 247, 0.16) 0%, rgba(168, 85, 247, 0.04) 45%, transparent 70%);
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle at center, rgba(168, 85, 247, 0.12) 0%, rgba(168, 85, 247, 0.03) 45%, transparent 70%);
             z-index: 1;
             pointer-events: none;
         }
@@ -636,7 +628,6 @@
             z-index: 12;
         }
 
-        /* Compact focus layout box wrapper */
         .input-box-wrapper {
             position: relative;
             display: flex;
@@ -647,7 +638,6 @@
             padding: 6px 10px 6px 24px;
             transition: all 0.2s ease;
             width: 100%;
-            max-width: 500px;
         }
         .input-box-wrapper:focus-within {
             border-color: #a855f7;
@@ -686,11 +676,13 @@
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #1f2026; border-radius: 10px; }
 
+        /* Robust, explicit responsive breakpoints to fix mobile viewport collapses */
         @media (max-width: 768px) {
-            body {
-                display: block;
+            html, body {
+                position: fixed;
+                overflow: hidden;
+                width: 100%;
                 height: 100vh;
-                height: -webkit-fill-available;
             }
             
             .collapsed-mini-strip {
@@ -702,8 +694,7 @@
                 top: 0;
                 left: 0;
                 z-index: 70;
-                height: 100vh;
-                height: -webkit-fill-available;
+                height: 100%;
                 width: 82vw;
                 min-width: 82vw !important;
                 max-width: 320px;
@@ -721,6 +712,7 @@
                 width: 82vw;
                 min-width: 82vw !important;
                 padding: 18px 16px 16px 16px;
+                transform: translateX(-100%);
             }
 
             .sidebar-inner-wrapper {
@@ -732,14 +724,19 @@
             }
 
             .main-content {
-                width: 100vw;
-                height: 100vh;
-                height: -webkit-fill-available;
+                width: 100% !important;
+                height: 100% !important;
+            }
+
+            .main-content.empty-chat {
+                display: grid !important;
+                place-items: center !important;
+                align-content: center !important;
             }
 
             .main-content.empty-chat .interactive-deck-wrapper::before {
                 width: 100%;
-                height: 400px;
+                height: 100%;
             }
 
             .floating-mobile-toggle {
@@ -752,7 +749,8 @@
 
             .main-content.empty-chat .interactive-deck-wrapper {
                 padding: 0 20px;
-                width: 100%;
+                width: 100vw;
+                box-sizing: border-box;
             }
 
             .interactive-deck-wrapper {
@@ -946,7 +944,8 @@
                 document.body.classList.toggle('sidebar-collapsed');
                 document.body.classList.remove('sidebar-open');
             }
-            document.getElementById('account-popup-menu').classList.remove('active');
+            const accMenu = document.getElementById('account-popup-menu');
+            if(accMenu) accMenu.classList.remove('active');
         }
 
         function toggleSidebarView() {
@@ -956,6 +955,7 @@
         function checkHeroVisibility() {
             const frame = document.getElementById('main-content-frame');
             const chatArea = document.getElementById('chat-area');
+            if(!frame || !chatArea) return;
             
             if (chatArea.children.length > 0) {
                 frame.classList.remove('empty-chat');
@@ -967,13 +967,15 @@
         function toggleRecentsPanel(e) {
             const arrow = document.getElementById('recents-arrow');
             const list = document.getElementById('history-list');
-            arrow.classList.toggle('collapsed');
-            list.classList.toggle('hidden-pane');
+            if(arrow) arrow.classList.toggle('collapsed');
+            if(list) list.toggle('hidden-pane');
         }
 
         function toggleAccountMenu(e, fromMiniStrip = false) {
             e.stopPropagation();
             const menu = document.getElementById('account-popup-menu');
+            if(!menu) return;
+            
             const isCurrentlyActive = menu.classList.contains('active');
             const wasMiniStripActive = menu.classList.contains('mini-strip-active');
             
@@ -993,6 +995,7 @@
         function toggleSidebarSearch() {
             const wrapper = document.getElementById('search-input-container');
             const inputField = document.getElementById('sidebar-search');
+            if(!wrapper || !inputField) return;
             
             wrapper.classList.toggle('show-search');
             if (wrapper.classList.contains('show-search')) {
@@ -1004,11 +1007,15 @@
         }
 
         function filterChatThreads() {
-            const query = document.getElementById('sidebar-search').value.toLowerCase().trim();
+            const searchField = document.getElementById('sidebar-search');
+            if(!searchField) return;
+            const query = searchField.value.toLowerCase().trim();
             const items = document.querySelectorAll('.history-item-container');
             
             items.forEach(container => {
-                const titleText = container.querySelector('.history-item').innerText.toLowerCase();
+                const innerItem = container.querySelector('.history-item');
+                if(!innerItem) return;
+                const titleText = innerItem.innerText.toLowerCase();
                 if (titleText.includes(query)) {
                     container.classList.remove('filtered-out');
                 } else {
@@ -1023,6 +1030,7 @@
                 if (response.ok) {
                     const histories = await response.json();
                     const listContainer = document.getElementById('history-list');
+                    if(!listContainer) return;
                     listContainer.innerHTML = '';
                     
                     histories.forEach(item => {
@@ -1059,7 +1067,7 @@
                     filterChatThreads();
                 }
             } catch (err) {
-                console.error("Failed to load historical vectors index", err);
+                console.error("Failed to load history indices", err);
             }
         }
 
@@ -1079,7 +1087,7 @@
 
         async function renameChatThread(sessionId, oldTitle, e) {
             e.stopPropagation();
-            const newTitle = prompt("Enter a new title for this conversation thread:", oldTitle);
+            const newTitle = prompt("Enter a new title for this thread:", oldTitle);
             if (!newTitle || !newTitle.trim()) return;
             
             try {
@@ -1092,13 +1100,13 @@
                     loadSidebarHistory();
                 }
             } catch (err) {
-                console.error("Failed adjusting title profile mappings", err);
+                console.error("Failed adjusting thread title mapping", err);
             }
         }
 
         async function deleteIndividualChat(sessionId, e) {
             e.stopPropagation();
-            if (!confirm("Delete this chat thread completely?")) return;
+            if (!confirm("Delete this conversation thread completely?")) return;
             
             try {
                 const response = await fetch(`/api/session/${sessionId}`, { method: 'DELETE' });
@@ -1109,7 +1117,7 @@
                     loadSidebarHistory();
                 }
             } catch (err) {
-                console.error("Failure pruning selected chat profile matrix", err);
+                console.error("Failure pruning chat profile matrix", err);
             }
         }
 
@@ -1121,6 +1129,7 @@
                 if (response.ok) {
                     const data = await response.json();
                     const chatArea = document.getElementById('chat-area');
+                    if(!chatArea) return;
                     chatArea.innerHTML = '';
                     data.messages.forEach(msg => {
                         renderMessage(msg.content, msg.role === 'user', "", false);
@@ -1136,8 +1145,10 @@
         function startNewChat() {
             if (isTypingActive) return;
             currentSessionId = "";
-            document.getElementById('chat-area').innerHTML = '';
-            document.getElementById('sidebar-search').value = '';
+            const chatArea = document.getElementById('chat-area');
+            const searchField = document.getElementById('sidebar-search');
+            if(chatArea) chatArea.innerHTML = '';
+            if(searchField) searchField.value = '';
             filterChatThreads();
             checkHeroVisibility();
             if (window.innerWidth <= 768) document.body.classList.remove('sidebar-open');
@@ -1150,10 +1161,12 @@
         async function sendPrompt() {
             if (isTypingActive) return;
             const inputEl = document.getElementById('user-input');
+            if(!inputEl) return;
             const prompt = inputEl.value.trim();
             if (!prompt) return;
 
-            document.getElementById('main-content-frame').classList.remove('empty-chat');
+            const frame = document.getElementById('main-content-frame');
+            if(frame) frame.classList.remove('empty-chat');
             
             renderMessage(prompt, true, "", false);
             inputEl.value = '';
@@ -1185,6 +1198,7 @@
 
         function showThinkingIndicator() {
             const chatArea = document.getElementById('chat-area');
+            if(!chatArea) return "";
             const id = 'loader-' + Date.now();
             const wrapper = document.createElement('div');
             wrapper.className = 'message-wrapper ai-wrapper';
@@ -1202,12 +1216,14 @@
         }
 
         function removeThinkingIndicator(id) {
+            if(!id) return;
             const loader = document.getElementById(id);
             if (loader) loader.remove();
         }
 
         function renderMessage(text, isUser, modelInfo = "", animate = false) {
             const chatArea = document.getElementById('chat-area');
+            if(!chatArea) return;
             const wrapper = document.createElement('div');
             wrapper.className = `message-wrapper ${isUser ? 'user-wrapper' : 'ai-wrapper'}`;
             const msgDiv = document.createElement('div');
@@ -1228,7 +1244,7 @@
             if (isUser) {
                 msgDiv.innerText = text;
                 chatArea.scrollTop = chatArea.scrollHeight;
-            } else if (animate) {
+            } else if (animate && typeof marked !== 'undefined') {
                 isTypingActive = true;
                 let index = 0;
                 let currentText = "";
@@ -1248,7 +1264,7 @@
                 }
                 type();
             } else {
-                msgDiv.innerHTML = marked.parse(text);
+                msgDiv.innerHTML = typeof marked !== 'undefined' ? marked.parse(text) : text;
                 chatArea.scrollTop = chatArea.scrollHeight;
             }
         }
